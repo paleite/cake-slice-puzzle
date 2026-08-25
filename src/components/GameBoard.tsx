@@ -49,7 +49,7 @@ export function GameBoard() {
               "--from-y": positionPercent(event.sourceSlotId, "y"),
               "--to-x": positionPercent(event.targetSlotId, "x"),
               "--to-y": positionPercent(event.targetSlotId, "y"),
-              "--flight-delay": `${index * 320}ms`,
+              "--flight-delay": `${index * 700}ms`,
             } as CSSProperties}
           >
             <path d="M 50 50 L 50 7 A 43 43 0 0 1 87 71 Z" className={`slice-flight__wedge slice-flight__wedge--${event.cakeTypeId}`} />
@@ -62,7 +62,7 @@ export function GameBoard() {
             style={{
               left: positionPercent(event.slotId, "x"),
               top: positionPercent(event.slotId, "y"),
-              "--clear-delay": `${index * 320}ms`,
+              "--clear-delay": `${index * 700}ms`,
             } as CSSProperties}
           >
             <Plate

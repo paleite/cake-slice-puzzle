@@ -55,8 +55,8 @@ button { font: inherit; }
 }
 
 .board__animations { position: absolute; inset: 10px 4px; pointer-events: none; z-index: 3; }
-.slice-flight { position: absolute; left: var(--from-x); top: var(--from-y); width: 18%; aspect-ratio: 1; overflow: visible; transform: translate(-50%, -50%) scale(.62); animation: slice-flight 300ms cubic-bezier(.2,.75,.25,1) var(--flight-delay) both; }
-.slice-flight__wedge { stroke: #fff8ee; stroke-width: 1.5; transform-origin: 50px 50px; animation: slice-flight-spin 300ms ease-in var(--flight-delay) both; }
+.slice-flight { position: absolute; left: var(--from-x); top: var(--from-y); width: calc(25% - 8px); aspect-ratio: 1; overflow: visible; transform: translate(-50%, -50%); animation: slice-flight 650ms cubic-bezier(.2,.75,.25,1) var(--flight-delay) both; }
+.slice-flight__wedge { stroke: #fff8ee; stroke-width: 1.5; transform-origin: 50px 50px; animation: slice-flight-spin 650ms ease-in var(--flight-delay) both; }
 .slice-flight__wedge--strawberry { fill: #ef6a72; }
 .slice-flight__wedge--lemon { fill: #f5c84c; }
 .slice-flight__wedge--mint { fill: #74c58a; }
@@ -97,7 +97,7 @@ button { font: inherit; }
   100% { left: var(--to-x); top: var(--to-y); opacity: 0; }
 }
 
-@keyframes slice-flight-spin { from { transform: rotate(0deg); } to { transform: rotate(300deg); } }
+@keyframes slice-flight-spin { from { transform: rotate(0deg); } to { transform: rotate(420deg); } }
 @keyframes plate-receive { 0%, 100% { transform: scale(1) rotate(0deg); } 35% { transform: scale(1.06) rotate(5deg); } 70% { transform: scale(.98) rotate(-3deg); } }
 @keyframes plate-clear {
   0% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }

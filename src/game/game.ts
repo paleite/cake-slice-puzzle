@@ -4,9 +4,14 @@ import { resolveBoard } from "./resolver";
 import type { GameState, Plate, SlotId } from "./types";
 
 export function createNewGame(seed = Date.now() >>> 0): GameState {
-  const generated = generateTray(seed, 0);
+  const opening = generateTray(seed, 0);
+  const generated = generateTray(opening.seed, 0);
+  const openingSlotIds = ["b1", "b2", "c1"] as const;
   return {
-    slots: createEmptySlots(),
+    slots: createEmptySlots().map((slot, index) => {
+      const openingIndex = openingSlotIds.indexOf(slot.id as typeof openingSlotIds[number]);
+      return openingIndex === -1 ? slot : { ...slot, plate: opening.tray[openingIndex] };
+    }),
     tray: generated.tray,
     score: 0,
     cakesCleared: 0,
