@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
+  base: "/cake-slice-puzzle/",
   plugins: [
     react(),
     VitePWA({
@@ -16,7 +17,7 @@ export default defineConfig({
         background_color: "#fff6e9",
         display: "standalone",
         orientation: "portrait",
-        start_url: "/",
+        start_url: "/cake-slice-puzzle/",
         icons: [
           {
             src: "/icon.svg",
