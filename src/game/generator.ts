@@ -8,7 +8,7 @@ function makePlateId(seed: number, index: number): string {
 
 export function generateTray(seed: number, score: number): { tray: Plate[]; seed: number } {
   let currentSeed = seed;
-  const activeTypeCount = score >= 1_500 ? 5 : score >= 600 ? 4 : 3;
+  const activeTypeCount = score >= 1_500 ? 6 : score >= 600 ? 5 : 4;
   const availableTypes = CAKE_TYPES.slice(0, activeTypeCount);
   const tray: Plate[] = [];
 

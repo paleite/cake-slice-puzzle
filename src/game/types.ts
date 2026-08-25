@@ -1,4 +1,4 @@
-export const CAKE_TYPES = ["strawberry", "lemon", "mint", "blueberry", "chocolate"] as const;
+export const CAKE_TYPES = ["strawberry", "lemon", "mint", "blueberry", "chocolate", "orange"] as const;
 
 export type CakeTypeId = (typeof CAKE_TYPES)[number];
 

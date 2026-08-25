@@ -6,6 +6,7 @@ const cakeColors: Record<CakeTypeId, string> = {
   mint: "#74c58a",
   blueberry: "#7788da",
   chocolate: "#9a6957",
+  orange: "#f29b52",
 };
 
 function polarPoint(angleDegrees: number, radius: number) {
