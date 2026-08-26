@@ -25,16 +25,20 @@ describe("resolveBoard", () => {
     expect(result.state.status).toBe("playing");
   });
 
-  it("does not relay one cake type through the placed plate", () => {
+  it("merges every source in one connected component for the cake type", () => {
     const result = resolveBoard(state({
-      b0: plate("left", ["blueberry", "blueberry", "blueberry", "blueberry", "blueberry", "mint"]),
-      b1: plate("origin", ["blueberry", "blueberry", "lemon"]),
-      b2: plate("right", ["blueberry"]),
-    }), "b1");
+      c2: plate("origin", ["blueberry", "lemon"]),
+      c3: plate("target", ["blueberry", "blueberry"]),
+      d2: plate("second-source", ["blueberry"]),
+    }), "c2");
     const blueberryTransfers = result.events.filter((event) => event.type === "transfer" && event.cakeTypeId === "blueberry");
-    expect(blueberryTransfers).toHaveLength(1);
-    expect(blueberryTransfers[0]).toMatchObject({ sourceSlotId: "b0", targetSlotId: "b1", sliceCount: 3 });
-    expect(result.state.slots.find((slot) => slot.id === "b2")?.plate?.slices.map((slice) => slice.cakeTypeId)).toEqual(["blueberry"]);
+    expect(blueberryTransfers).toHaveLength(2);
+    expect(blueberryTransfers).toEqual(expect.arrayContaining([
+      expect.objectContaining({ sourceSlotId: "c2", targetSlotId: "c3", sliceCount: 1 }),
+      expect.objectContaining({ sourceSlotId: "d2", targetSlotId: "c3", sliceCount: 1 }),
+    ]));
+    expect(result.state.slots.find((slot) => slot.id === "c2")?.plate?.slices.map((slice) => slice.cakeTypeId)).toEqual(["lemon"]);
+    expect(result.state.slots.find((slot) => slot.id === "d2")?.plate).toBeNull();
   });
 
   it("allows different cake types to resolve with different direct neighbors", () => {

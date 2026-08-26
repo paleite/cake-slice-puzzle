@@ -1,6 +1,6 @@
 import { GAME_CONFIG } from "./config";
 import { isCompletePlate } from "./completion";
-import { applyTransfer, findTransfer } from "./transfers";
+import { applyMergeCandidate, findMergeCandidate } from "./transfers";
 import type { CakeTypeId, ClearEvent, GameState, ResolveResult, SlotId } from "./types";
 
 export function resolveBoard(initialState: GameState, resolutionOriginSlotId: SlotId): ResolveResult {
@@ -26,11 +26,11 @@ export function resolveBoard(initialState: GameState, resolutionOriginSlotId: Sl
       continue;
     }
 
-    const transfer = findTransfer(state, resolutionOriginSlotId, resolvedCakeTypeIds);
-    if (transfer !== null) {
-      state = applyTransfer(state, transfer);
-      events.push(transfer);
-      resolvedCakeTypeIds.add(transfer.cakeTypeId);
+    const mergeCandidate = findMergeCandidate(state, resolutionOriginSlotId, resolvedCakeTypeIds);
+    if (mergeCandidate !== null) {
+      state = applyMergeCandidate(state, mergeCandidate);
+      events.push(...mergeCandidate.transfers);
+      resolvedCakeTypeIds.add(mergeCandidate.cakeTypeId);
       continue;
     }
 

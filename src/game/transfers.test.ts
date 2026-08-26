@@ -1,48 +1,34 @@
 import { describe, expect, it } from "vitest";
 import { createEmptySlots } from "./geometry";
-import { findTransfer } from "./transfers";
+import { findMergeCandidate, getMatchingComponentSlotIds } from "./transfers";
 import type { CakeTypeId, GameState, Plate, SlotId } from "./types";
 
-function plate(id: string, types: CakeTypeId[]): Plate {
-  return { id, slices: types.map((cakeTypeId) => ({ cakeTypeId })) };
-}
-
+function plate(id: string, types: CakeTypeId[]): Plate { return { id, slices: types.map((cakeTypeId) => ({ cakeTypeId })) }; }
 function state(plates: Partial<Record<SlotId, Plate>>): GameState {
   return { slots: createEmptySlots().map((slot) => ({ ...slot, plate: plates[slot.id] ?? null })), tray: [], score: 0, cakesCleared: 0, status: "playing", randomSeed: 1, focusedSlotId: null };
 }
 
-describe("findTransfer", () => {
-  it("moves a full larger group into a smaller group with capacity", () => {
-    const result = findTransfer(state({
-      b1: plate("source", ["blueberry", "blueberry", "blueberry", "blueberry", "blueberry", "mint"]),
-      b2: plate("target", ["blueberry", "blueberry"]),
-    }), "b2", new Set());
-    expect(result).toMatchObject({ sourceSlotId: "b1", targetSlotId: "b2", cakeTypeId: "blueberry", sliceCount: 4, completesCake: true });
+describe("findMergeCandidate", () => {
+  it("collects all matching plates in one connected component", () => {
+    const gameState = state({ c1: plate("left", ["mint"]), c2: plate("origin", ["mint", "strawberry"]), c3: plate("right", ["strawberry", "strawberry"]), d2: plate("below", ["strawberry"]) });
+    expect(getMatchingComponentSlotIds(gameState, "c2", "strawberry")).toEqual(["c2", "c3", "d2"]);
   });
 
-  it("uses the only plate with capacity", () => {
-    const result = findTransfer(state({
-      b1: plate("full", ["lemon", "lemon", "lemon", "strawberry", "mint", "orange"]),
-      b2: plate("open", ["lemon"]),
-    }), "b2", new Set());
-    expect(result).toMatchObject({ sourceSlotId: "b1", targetSlotId: "b2", cakeTypeId: "lemon", sliceCount: 3 });
+  it("merges a full connected component into its largest open target", () => {
+    const result = findMergeCandidate(state({ b0: plate("left", ["blueberry", "blueberry", "blueberry", "blueberry", "blueberry", "mint"]), b1: plate("origin", ["blueberry", "blueberry", "lemon"]), b2: plate("right", ["blueberry"])}), "b1", new Set());
+    expect(result).toMatchObject({ cakeTypeId: "blueberry", targetSlotId: "b1" });
+    expect(result?.transfers).toEqual([{ type: "transfer", sourceSlotId: "b0", targetSlotId: "b1", cakeTypeId: "blueberry", sliceCount: 3 }]);
   });
 
-  it("returns no transfer when both plates are full or share no type", () => {
-    expect(findTransfer(state({ b1: plate("a", ["lemon", "strawberry", "mint", "orange", "chocolate", "blueberry"]), b2: plate("b", ["lemon", "strawberry", "mint", "orange", "chocolate", "blueberry"]) }), "b1", new Set())).toBeNull();
-    expect(findTransfer(state({ b1: plate("a", ["lemon"]), b2: plate("b", ["mint"]) }), "b1", new Set())).toBeNull();
+  it("uses capacity before group size and supports partial contribution", () => {
+    const result = findMergeCandidate(state({ b0: plate("full", ["orange", "orange", "orange", "orange", "chocolate", "lemon"]), b1: plate("origin", ["orange", "orange", "mint", "mint", "mint"])}), "b1", new Set());
+    expect(result).toMatchObject({ targetSlotId: "b1", cakeTypeId: "orange" });
+    expect(result?.transfers[0]).toMatchObject({ sourceSlotId: "b0", sliceCount: 1 });
   });
 
-  it("transfers only slices that fit and uses lower slot order for ties", () => {
-    expect(findTransfer(state({ b1: plate("a", ["orange", "orange", "orange", "orange", "chocolate", "lemon"]), b2: plate("b", ["orange", "orange", "mint", "mint", "mint"]) }), "b2", new Set())).toMatchObject({ sourceSlotId: "b1", targetSlotId: "b2", sliceCount: 1 });
-    expect(findTransfer(state({ b1: plate("a", ["strawberry", "strawberry"]), b2: plate("b", ["strawberry", "strawberry"]) }), "b1", new Set())).toMatchObject({ sourceSlotId: "b2", targetSlotId: "b1", sliceCount: 2 });
-  });
-
-  it("ignores matching pairs that do not include the resolution origin", () => {
-    expect(findTransfer(state({ a0: plate("left", ["lemon"]), a1: plate("right", ["lemon", "lemon", "lemon"]), c1: plate("origin", ["mint"]) }), "c1", new Set())).toBeNull();
-  });
-
-  it("excludes a cake type already resolved during the placement", () => {
-    expect(findTransfer(state({ b0: plate("left", ["blueberry", "blueberry", "blueberry"]), b1: plate("origin", ["blueberry"]) }), "b1", new Set(["blueberry"]))).toBeNull();
+  it("ignores excluded types and disconnected matching pairs", () => {
+    const gameState = state({ a0: plate("left", ["lemon"]), a1: plate("right", ["lemon", "lemon", "lemon"]), c1: plate("origin", ["mint"]) });
+    expect(findMergeCandidate(gameState, "c1", new Set())).toBeNull();
+    expect(findMergeCandidate(state({ b0: plate("left", ["blueberry", "blueberry"]), b1: plate("origin", ["blueberry"]) }), "b1", new Set(["blueberry"]))).toBeNull();
   });
 });
