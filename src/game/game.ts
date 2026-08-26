@@ -34,7 +34,7 @@ export function placePlate(state: GameState, plateId: string, targetSlotId: Slot
     focusedSlotId: targetSlotId,
   };
 
-  const resolved = resolveBoard(placedState);
+  const resolved = resolveBoard(placedState, targetSlotId);
   let nextState = resolved.state;
 
   if (nextState.tray.length === 0) {

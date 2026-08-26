@@ -1,11 +1,12 @@
 import { GAME_CONFIG } from "./config";
 import { isCompletePlate } from "./completion";
 import { applyTransfer, findTransfer } from "./transfers";
-import type { ClearEvent, GameState, ResolveResult } from "./types";
+import type { CakeTypeId, ClearEvent, GameState, ResolveResult, SlotId } from "./types";
 
-export function resolveBoard(initialState: GameState): ResolveResult {
+export function resolveBoard(initialState: GameState, resolutionOriginSlotId: SlotId): ResolveResult {
   let state: GameState = { ...initialState, status: "resolving" };
   const events: ResolveResult["events"] = [];
+  const resolvedCakeTypeIds = new Set<CakeTypeId>();
 
   for (let operationIndex = 0; operationIndex < GAME_CONFIG.maximumResolutionOperations; operationIndex += 1) {
     const completedSlot = state.slots.find((slot) => slot.plate !== null && isCompletePlate(slot.plate));
@@ -25,10 +26,11 @@ export function resolveBoard(initialState: GameState): ResolveResult {
       continue;
     }
 
-    const transfer = findTransfer(state);
+    const transfer = findTransfer(state, resolutionOriginSlotId, resolvedCakeTypeIds);
     if (transfer !== null) {
       state = applyTransfer(state, transfer);
       events.push(transfer);
+      resolvedCakeTypeIds.add(transfer.cakeTypeId);
       continue;
     }
 

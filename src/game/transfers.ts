@@ -41,24 +41,28 @@ export function chooseTransferDirection(
     : { sourceSlotId: firstSlotId, targetSlotId: secondSlotId };
 }
 
-export function findTransfer(state: GameState): TransferCandidate | null {
+export function findTransfer(
+  state: GameState,
+  resolutionOriginSlotId: SlotId,
+  excludedCakeTypeIds: ReadonlySet<CakeTypeId>,
+): TransferCandidate | null {
   const candidates: TransferCandidate[] = [];
   const slotOrder = new Map<SlotId, number>(state.slots.map((slot, index) => [slot.id, index]));
+  const originPlate = getPlate(state, resolutionOriginSlotId);
+  if (originPlate === null) return null;
 
-  for (const firstSlot of state.slots) {
-    if (firstSlot.plate === null) continue;
-    const firstOrder = slotOrder.get(firstSlot.id) ?? Number.MAX_SAFE_INTEGER;
-    for (const secondSlotId of getAdjacentSlotIds(firstSlot.id)) {
-      const secondOrder = slotOrder.get(secondSlotId) ?? Number.MAX_SAFE_INTEGER;
-      if (secondOrder <= firstOrder) continue;
-      if (getPlate(state, secondSlotId) === null) continue;
+  for (const neighborSlotId of getAdjacentSlotIds(resolutionOriginSlotId)) {
+    const neighborPlate = getPlate(state, neighborSlotId);
+    if (neighborPlate === null) continue;
+    const neighborTypes = new Set(getCakeTypes(state, neighborSlotId));
+    const sharedTypes = getCakeTypes(state, resolutionOriginSlotId).filter(
+      (cakeTypeId) => neighborTypes.has(cakeTypeId) && !excludedCakeTypeIds.has(cakeTypeId),
+    );
 
-      const secondTypes = new Set(getCakeTypes(state, secondSlotId));
-      const sharedTypes = getCakeTypes(state, firstSlot.id).filter((cakeTypeId) => secondTypes.has(cakeTypeId));
-      for (const cakeTypeId of sharedTypes) {
+    for (const cakeTypeId of sharedTypes) {
         const direction = chooseTransferDirection(
-          firstSlot.id, countType(state, firstSlot.id, cakeTypeId), getFreeCapacity(state, firstSlot.id),
-          secondSlotId, countType(state, secondSlotId, cakeTypeId), getFreeCapacity(state, secondSlotId), slotOrder,
+          resolutionOriginSlotId, countType(state, resolutionOriginSlotId, cakeTypeId), getFreeCapacity(state, resolutionOriginSlotId),
+          neighborSlotId, countType(state, neighborSlotId, cakeTypeId), getFreeCapacity(state, neighborSlotId), slotOrder,
         );
         if (direction === null) continue;
 
@@ -76,7 +80,6 @@ export function findTransfer(state: GameState): TransferCandidate | null {
             && targetCount + sliceCount === GAME_CONFIG.plateCapacity,
           targetExistingCount: targetCount,
         });
-      }
     }
   }
 
