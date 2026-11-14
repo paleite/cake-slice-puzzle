@@ -2,14 +2,9 @@
   <title id="title">Kawaii orange cake slice</title>
   <desc id="desc">Isometric orange-frosted cake wedge with citrus segment, zest, face, and shadow.</desc>
   <defs>
-    <linearGradient id="side" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0d2"/><stop offset="1" stop-color="#efbd86"/></linearGradient>
     <linearGradient id="top" x1=".15" y1=".05" x2=".8" y2=".95"><stop stop-color="#ffc486"/><stop offset="1" stop-color="#f08a4e"/></linearGradient>
   </defs>
-  <ellipse cx="100" cy="181" rx="66" ry="10" fill="#5b3a2e" opacity=".14"/>
-  <path d="M25 59 Q100 27 175 59 L100 190Z" fill="url(#side)" stroke="#5b3a2e" stroke-width="6" stroke-linejoin="round"/>
-  <path d="M41 83 Q100 60 159 83" fill="none" stroke="#ed9455" stroke-width="8" stroke-linecap="round" opacity=".72"/>
-  <path d="M51 108 Q100 90 149 108" fill="none" stroke="#fff8e8" stroke-width="8" stroke-linecap="round" opacity=".9"/>
-  <path d="M25 59 Q100 22 175 59 L100 168Z" fill="url(#top)" stroke="#5b3a2e" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M25 59 Q100 22 175 59 L100 190Z" fill="url(#top)" stroke="#5b3a2e" stroke-width="6" stroke-linejoin="round"/>
   <path d="M39 59 Q83 38 124 44" fill="none" stroke="#ffe0b1" stroke-width="8" stroke-linecap="round" opacity=".82"/>
   <g transform="translate(136 57) rotate(14)" stroke="#5b3a2e" stroke-linejoin="round">
     <path d="M-20 2 A21 21 0 0 1 20 2 Q0 13-20 2Z" fill="#ffe0a0" stroke-width="3.5"/>
@@ -17,8 +12,4 @@
     <path d="M0 8V-14 M0 8L-11-7 M0 8L11-7" fill="none" stroke="#ffe5ae" stroke-width="2.2"/>
   </g>
   <g fill="#d96f32"><circle cx="53" cy="67" r="1.8"/><circle cx="64" cy="58" r="1.5"/><circle cx="75" cy="70" r="1.7"/><circle cx="151" cy="78" r="1.6"/><circle cx="109" cy="63" r="1.6"/></g>
-  <g fill="#5b3a2e"><ellipse cx="81" cy="102" rx="5.5" ry="7"/><ellipse cx="119" cy="102" rx="5.5" ry="7"/></g>
-  <g fill="#fff" opacity=".75"><circle cx="79.5" cy="99.5" r="1.5"/><circle cx="117.5" cy="99.5" r="1.5"/></g>
-  <path d="M94 119 Q100 126 106 119" fill="none" stroke="#5b3a2e" stroke-width="3.5" stroke-linecap="round"/>
-  <g fill="#ed7780" opacity=".58"><ellipse cx="64" cy="116" rx="8" ry="4"/><ellipse cx="136" cy="116" rx="8" ry="4"/></g>
 </svg>

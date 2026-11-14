@@ -11,6 +11,27 @@ import {
 } from "../presentation/cake-assets";
 import { sortSlicesByType } from "../presentation/plate-geometry";
 
+function Face({ medallion = false }: { medallion?: boolean }) {
+  return (
+    <>
+      {medallion && <ellipse cx="0" cy="0" rx="12" ry="8" fill="#fff4dc" stroke="#5b3a2e" strokeWidth="0.8" />}
+      <g fill="#5b3a2e">
+        <ellipse cx="-5" cy="-2" rx="1.6" ry="2" />
+        <ellipse cx="5" cy="-2" rx="1.6" ry="2" />
+      </g>
+      <g fill="#fff" opacity=".75">
+        <circle cx="-5.5" cy="-3" r="0.5" />
+        <circle cx="4.5" cy="-3" r="0.5" />
+      </g>
+      <path d="M-2 2.2 Q0 4.2 2 2.2" fill="none" stroke="#5b3a2e" strokeWidth="1" strokeLinecap="round" />
+      <g fill="#e8848c" opacity=".6">
+        <ellipse cx="-9" cy="1.6" rx="2.4" ry="1.2" />
+        <ellipse cx="9" cy="1.6" rx="2.4" ry="1.2" />
+      </g>
+    </>
+  );
+}
+
 export function Plate({
   plate,
   compact = false,
@@ -62,10 +83,20 @@ export function Plate({
                     height={SLICE_IMAGE_SIZE}
                     className="plate__slice"
                   />
+                  {visibleSliceCount === 1 && (
+                    <g transform="translate(50 34.5)">
+                      <Face />
+                    </g>
+                  )}
                 </g>
               );
             })}
           </g>
+          {visibleSliceCount > 1 && (
+            <g className="plate__face" transform={`translate(${PLATE_CENTER.x} ${PLATE_CENTER.y})`}>
+              <Face medallion />
+            </g>
+          )}
         </g>
       </svg>
     </div>

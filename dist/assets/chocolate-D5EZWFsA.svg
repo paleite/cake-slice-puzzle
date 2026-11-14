@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+  <title id="title">Kawaii chocolate cake slice</title>
+  <desc id="desc">Isometric cocoa cake wedge with chocolate curl, drizzle, face, and shadow.</desc>
+  <defs>
+    <linearGradient id="top" x1=".15" y1=".05" x2=".8" y2=".95"><stop stop-color="#c78667"/><stop offset="1" stop-color="#8f5546"/></linearGradient>
+  </defs>
+  <path d="M25 59 Q100 22 175 59 L100 190Z" fill="url(#top)" stroke="#5b3a2e" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M39 59 Q83 38 124 44" fill="none" stroke="#efbb99" stroke-width="8" stroke-linecap="round" opacity=".66"/>
+  <path d="M45 68 Q60 77 75 66 T105 67 T135 65 T158 70" fill="none" stroke="#633d34" stroke-width="6" stroke-linecap="round"/>
+  <g transform="translate(137 51) rotate(10)" fill="none" stroke="#5b3a2e" stroke-linecap="round">
+    <path d="M-17 5 C-12-12 15-12 16 1 C17 11 1 13-4 6 C-8 0 0-5 7-1" stroke-width="7"/>
+    <path d="M-15 3 C-10-7 9-8 12 0" stroke="#d99a75" stroke-width="2.5"/>
+  </g>
+</svg>

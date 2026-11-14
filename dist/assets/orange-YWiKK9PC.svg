@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+  <title id="title">Kawaii orange cake slice</title>
+  <desc id="desc">Isometric orange-frosted cake wedge with citrus segment, zest, face, and shadow.</desc>
+  <defs>
+    <linearGradient id="top" x1=".15" y1=".05" x2=".8" y2=".95"><stop stop-color="#ffc486"/><stop offset="1" stop-color="#f08a4e"/></linearGradient>
+  </defs>
+  <path d="M25 59 Q100 22 175 59 L100 190Z" fill="url(#top)" stroke="#5b3a2e" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M39 59 Q83 38 124 44" fill="none" stroke="#ffe0b1" stroke-width="8" stroke-linecap="round" opacity=".82"/>
+  <g transform="translate(136 57) rotate(14)" stroke="#5b3a2e" stroke-linejoin="round">
+    <path d="M-20 2 A21 21 0 0 1 20 2 Q0 13-20 2Z" fill="#ffe0a0" stroke-width="3.5"/>
+    <path d="M-15 1 A16 16 0 0 1 15 1 Q0 9-15 1Z" fill="#ff9c45" stroke-width="2"/>
+    <path d="M0 8V-14 M0 8L-11-7 M0 8L11-7" fill="none" stroke="#ffe5ae" stroke-width="2.2"/>
+  </g>
+  <g fill="#d96f32"><circle cx="53" cy="67" r="1.8"/><circle cx="64" cy="58" r="1.5"/><circle cx="75" cy="70" r="1.7"/><circle cx="151" cy="78" r="1.6"/><circle cx="109" cy="63" r="1.6"/></g>
+</svg>
