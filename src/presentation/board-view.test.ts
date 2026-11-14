@@ -78,10 +78,37 @@ describe("board view", () => {
       event: transfer,
       from: getSlotCenter("b2"),
       to: getSlotCenter("b1"),
+      spinFrom: 240,
+      spinTo: 60,
     }]);
     expect(view.clearingSlotIds.size).toBe(0);
     expect(view.arrivedSlotIds.size).toBe(0);
     expect(view.plateRotations.get("b2")).toBe(-120);
+  });
+
+  it("creates one landing per transferred slice, each in the next free target wedge", () => {
+    const start = state({
+      b1: plate("two", Array<CakeTypeId>(2).fill("strawberry")),
+      b2: plate("source", Array<CakeTypeId>(2).fill("strawberry")),
+    });
+    const transferTwo: TransferEvent = { ...transfer, sliceCount: 2 };
+    const after = state({ b1: plate("four", Array<CakeTypeId>(4).fill("strawberry")) });
+    const active: Presentation = {
+      id: 8,
+      placedSlotId: "b2",
+      startState: start,
+      steps: [{ state: after, events: [transferTwo] }],
+      index: 0,
+      phase: "resolve",
+    };
+
+    const view = buildBoardView({ slots: [] }, active);
+
+    expect(view.flights).toHaveLength(2);
+    expect(view.flights.map((flight) => [flight.spinFrom, flight.spinTo])).toEqual([
+      [240, 60],
+      [240, 120],
+    ]);
   });
 
   it("marks the previous transfer target as arrived and the clearing slot during a clear step", () => {

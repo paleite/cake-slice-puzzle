@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Plate as PlateType } from "../game/types";
 import { CAKE_COLORS } from "../presentation/palette";
-import { sortSlicesByType } from "../presentation/plate-geometry";
 
 function polarPoint(angleDegrees: number, radius: number) {
   const angle = (angleDegrees - 90) * (Math.PI / 180);
@@ -23,7 +22,6 @@ export function Plate({
   compact?: boolean;
   rotationDegrees?: number;
 }) {
-  const groupedSlices = sortSlicesByType(plate.slices);
   const [displayRotation, setDisplayRotation] = useState(0);
 
   useEffect(() => {
@@ -39,7 +37,7 @@ export function Plate({
           className="plate__slices"
           style={{ transform: `rotate(${displayRotation}deg)` }}
         >
-          {groupedSlices.map((slice, index) => {
+          {plate.slices.map((slice, index) => {
             const startAngle = index * 60;
             return (
               <path

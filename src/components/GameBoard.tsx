@@ -54,7 +54,7 @@ export function GameBoard() {
       })}
 
       <div className="board__animations" aria-hidden="true">
-        {view.flights.map(({ event, from, to }, index) => (
+        {view.flights.map(({ event, from, to, spinFrom, spinTo }, index) => (
           <svg
             className="slice-flight"
             key={`${presentation?.id ?? 0}-${presentation?.phase ?? "idle"}-${view.stepIndex}-${index}`}
@@ -64,6 +64,8 @@ export function GameBoard() {
               "--from-y": `${from.y}%`,
               "--to-x": `${to.x}%`,
               "--to-y": `${to.y}%`,
+              "--spin-from": `${spinFrom}deg`,
+              "--spin-to": `${spinTo}deg`,
             } as CSSProperties}
           >
             <path

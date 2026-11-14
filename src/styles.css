@@ -100,12 +100,12 @@ button:focus-visible {
   position: absolute;
   left: var(--from-x);
   top: var(--from-y);
-  width: calc(25% - 8px);
+  width: calc(23% - 5.5px);
   aspect-ratio: 1;
   overflow: visible;
   transform: translate(-50%, -50%);
   animation: slice-flight var(--flight-ms) cubic-bezier(.45, .05, .55, .95) both;
-  will-change: transform, opacity;
+  will-change: left, top;
 }
 .slice-flight__wedge {
   stroke: #fff8ee;
@@ -154,7 +154,7 @@ button:focus-visible {
 .plate__slices {
   transform-box: view-box;
   transform-origin: 50% 50%;
-  transition: transform var(--rotate-ms, 260ms) cubic-bezier(.34, 1.4, .64, 1);
+  transition: transform var(--rotate-ms, 150ms) cubic-bezier(.2, .9, .25, 1.12);
 }
 .plate__dish { fill: #fffdfa; stroke: #dccbbc; stroke-width: 4; }
 .plate__slice { stroke: #fff8ee; stroke-width: 2; transform-origin: 50px 50px; }
@@ -230,27 +230,20 @@ button:focus-visible {
 .game-over__card button:hover { background: #57463a; }
 
 @keyframes slice-flight {
-  0% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) scale(.55); }
-  20% { opacity: 1; }
-  85% { opacity: 1; }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%)
-      translate(calc((var(--to-x) - var(--from-x)) * 4), calc((var(--to-y) - var(--from-y)) * 5))
-      scale(1);
-  }
+  0% { left: var(--from-x); top: var(--from-y); opacity: 1; }
+  100% { left: var(--to-x); top: var(--to-y); opacity: 1; }
 }
 @keyframes slice-flight-spin {
-  from { transform: rotate(-25deg); }
-  to { transform: rotate(200deg); }
+  from { transform: rotate(var(--spin-from)); }
+  to { transform: rotate(var(--spin-to)); }
 }
 @keyframes plate-drop {
   0% { opacity: 0; transform: translateY(-16px) scale(.9); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes plate-receive {
-  0% { opacity: .55; transform: scale(.86); }
-  60% { opacity: 1; transform: scale(1.06); }
+  0% { opacity: 1; transform: scale(.97); }
+  60% { opacity: 1; transform: scale(1.03); }
   100% { opacity: 1; transform: scale(1); }
 }
 @keyframes plate-clear {

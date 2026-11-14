@@ -4,9 +4,10 @@ import {
   getDirectionDegrees,
   getFreeWedgeCenterAngle,
   getSliceCenterAngle,
+  getSliceStartAngle,
   getSourceRotation,
   getTargetRotation,
-  sortSlicesByType,
+  normalizeAngle,
 } from "./plate-geometry";
 
 function plate(types: CakeTypeId[]): Plate {
@@ -18,11 +19,15 @@ function normalize(degrees: number): number {
 }
 
 describe("plate geometry", () => {
-  it("orders slices and derives wedge centers", () => {
+  it("derives wedge angles from arrival order", () => {
     const mixed = plate(["strawberry", "lemon"]);
-    expect(sortSlicesByType(mixed.slices).map((slice) => slice.cakeTypeId)).toEqual(["lemon", "strawberry"]);
-    expect(getSliceCenterAngle(mixed, "strawberry")).toBe(90);
+    expect(getSliceStartAngle(mixed, "strawberry")).toBe(0);
+    expect(getSliceStartAngle(mixed, "lemon")).toBe(60);
+    expect(getSliceCenterAngle(mixed, "strawberry")).toBe(30);
+    expect(getSliceCenterAngle(mixed, "lemon")).toBe(90);
     expect(getFreeWedgeCenterAngle(plate(Array<CakeTypeId>(5).fill("strawberry")))).toBe(330);
+    expect(normalizeAngle(-120)).toBe(240);
+    expect(normalizeAngle(420)).toBe(60);
   });
 
   it("points the outgoing slice at the target and the free wedge back at the source", () => {

@@ -2,10 +2,10 @@ import type { ResolveStep } from "../game/types";
 import type { Presentation } from "./model";
 
 export const STEP_TIMING = {
-  rotateMs: 260,
-  transferMs: 380,
+  rotateMs: 150,
+  transferMs: 360,
   clearMs: 660,
-  settleMs: 280,
+  settleMs: 220,
 } as const;
 
 export function getStepDurationMs(step: ResolveStep | undefined): number {
