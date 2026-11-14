@@ -52,15 +52,17 @@ describe("board view", () => {
     expect(view.clearingSlotIds.size).toBe(0);
     expect(view.placedSlotId).toBeNull();
     expect(view.plateRotations.size).toBe(0);
+    expect(view.hiddenSliceIndexes.size).toBe(0);
   });
 
-  it("keeps the source slices in place while both plates rotate toward each other", () => {
+  it("makes room on the rotated target by hiding the incoming sorted wedges", () => {
     const view = buildBoardView({ slots: [] }, presentation(0, "rotate"));
 
     expect(view.isAnimating).toBe(true);
     expect(view.placedSlotId).toBe("b2");
     expect(view.slots.find((slot) => slot.id === "b2")?.plate?.slices).toHaveLength(1);
-    expect(view.slots.find((slot) => slot.id === "b1")?.plate?.slices).toHaveLength(5);
+    expect(view.slots.find((slot) => slot.id === "b1")?.plate?.slices).toHaveLength(6);
+    expect(view.hiddenSliceIndexes.get("b1")).toEqual(new Set([5]));
     expect(view.flights).toEqual([]);
     expect(view.clearingSlotIds.size).toBe(0);
     expect(view.arrivedSlotIds.size).toBe(0);
@@ -68,12 +70,13 @@ describe("board view", () => {
     expect(view.plateRotations.get("b1")).toBe(120);
   });
 
-  it("empties transfer sources and positions the flight while the target still waits", () => {
+  it("empties transfer sources and lands flights in the hidden target wedges", () => {
     const view = buildBoardView({ slots: [] }, presentation(0, "resolve"));
 
     expect(view.placedSlotId).toBe("b2");
     expect(view.slots.find((slot) => slot.id === "b2")?.plate).toBeNull();
-    expect(view.slots.find((slot) => slot.id === "b1")?.plate?.slices).toHaveLength(5);
+    expect(view.slots.find((slot) => slot.id === "b1")?.plate?.slices).toHaveLength(6);
+    expect(view.hiddenSliceIndexes.get("b1")).toEqual(new Set([5]));
     expect(view.flights).toEqual([{
       event: transfer,
       from: getSlotCenter("b2"),
@@ -86,7 +89,7 @@ describe("board view", () => {
     expect(view.plateRotations.get("b2")).toBe(-120);
   });
 
-  it("creates one landing per transferred slice, each in the next free target wedge", () => {
+  it("creates one landing per transferred slice, each in the next hidden target wedge", () => {
     const start = state({
       b1: plate("two", Array<CakeTypeId>(2).fill("strawberry")),
       b2: plate("source", Array<CakeTypeId>(2).fill("strawberry")),
@@ -109,6 +112,33 @@ describe("board view", () => {
       [240, 60],
       [240, 120],
     ]);
+    expect(view.hiddenSliceIndexes.get("b1")).toEqual(new Set([2, 3]));
+  });
+
+  it("hides the incoming wedge at its color-sorted position", () => {
+    const start = state({
+      b1: plate("target", ["lemon", "strawberry"]),
+      b2: plate("source", ["blueberry", "lemon"]),
+    });
+    const after = state({
+      b1: plate("target", ["lemon", "strawberry", "lemon"]),
+      b2: plate("source", ["blueberry"]),
+    });
+    const transferLemon: TransferEvent = { ...transfer, cakeTypeId: "lemon" };
+    const active: Presentation = {
+      id: 9,
+      placedSlotId: "b2",
+      startState: start,
+      steps: [{ state: after, events: [transferLemon] }],
+      index: 0,
+      phase: "resolve",
+    };
+
+    const view = buildBoardView({ slots: [] }, active);
+
+    expect(view.slots.find((slot) => slot.id === "b1")?.plate?.slices).toHaveLength(3);
+    expect(view.hiddenSliceIndexes.get("b1")).toEqual(new Set([1]));
+    expect(view.plateRotations.get("b1")).toBe(0);
   });
 
   it("marks the previous transfer target as arrived and the clearing slot during a clear step", () => {
@@ -116,6 +146,7 @@ describe("board view", () => {
 
     expect(view.placedSlotId).toBeNull();
     expect(view.slots.find((slot) => slot.id === "b1")?.plate?.slices).toHaveLength(6);
+    expect(view.hiddenSliceIndexes.size).toBe(0);
     expect(view.clearingSlotIds.has("b1")).toBe(true);
     expect(view.arrivedSlotIds.has("b1")).toBe(true);
     expect(view.flights).toEqual([]);
@@ -128,6 +159,7 @@ describe("board view", () => {
     expect(view.placedSlotId).toBeNull();
     expect(view.slots.every((slot) => slot.plate === null)).toBe(true);
     expect(view.plateRotations.size).toBe(0);
+    expect(view.hiddenSliceIndexes.size).toBe(0);
     expect(view.flights).toEqual([]);
     expect(view.clearingSlotIds.size).toBe(0);
   });

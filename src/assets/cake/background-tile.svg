@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-labelledby="title desc">
+  <title id="title">Seamless pastel bakery pattern</title>
+  <desc id="desc">Cream and peach checker tile with low-contrast sprinkles and hearts.</desc>
+  <rect width="240" height="240" fill="#fff7e9"/>
+  <g fill="#f9d9c8" opacity=".32">
+    <rect width="60" height="60"/><rect x="120" width="60" height="60"/><rect x="60" y="60" width="60" height="60"/><rect x="180" y="60" width="60" height="60"/>
+    <rect y="120" width="60" height="60"/><rect x="120" y="120" width="60" height="60"/><rect x="60" y="180" width="60" height="60"/><rect x="180" y="180" width="60" height="60"/>
+  </g>
+  <g fill="none" stroke="#dc9e91" stroke-width="5" stroke-linecap="round" opacity=".28">
+    <path d="M28 33l8 4"/><path d="M84 23l-3 8"/><path d="M153 31l8-4"/><path d="M211 25l-1 9"/>
+    <path d="M28 153l8 4"/><path d="M84 143l-3 8"/><path d="M153 151l8-4"/><path d="M211 145l-1 9"/>
+    <path d="M31 88l-7 5"/><path d="M95 98l8 3"/><path d="M148 87l-2 8"/><path d="M218 101l7-4"/>
+    <path d="M31 208l-7 5"/><path d="M95 218l8 3"/><path d="M148 207l-2 8"/><path d="M218 221l7-4"/>
+  </g>
+  <g fill="#e8a1a1" opacity=".26">
+    <path d="M55 48C49 40 38 47 55 61C72 47 61 40 55 48Z"/><path d="M175 48C169 40 158 47 175 61C192 47 181 40 175 48Z"/>
+    <path d="M55 168C49 160 38 167 55 181C72 167 61 160 55 168Z"/><path d="M175 168C169 160 158 167 175 181C192 167 181 160 175 168Z"/>
+  </g>
+  <g fill="#a9cdb7" opacity=".25"><circle cx="116" cy="18" r="4"/><circle cx="236" cy="18" r="4"/><circle cx="116" cy="138" r="4"/><circle cx="236" cy="138" r="4"/><circle cx="58" cy="112" r="4"/><circle cx="178" cy="112" r="4"/><circle cx="58" cy="232" r="4"/><circle cx="178" cy="232" r="4"/></g>
+</svg>

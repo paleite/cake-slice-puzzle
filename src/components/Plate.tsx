@@ -1,27 +1,28 @@
 import { useEffect, useState } from "react";
 import type { Plate as PlateType } from "../game/types";
-import { CAKE_COLORS } from "../presentation/palette";
-
-function polarPoint(angleDegrees: number, radius: number) {
-  const angle = (angleDegrees - 90) * (Math.PI / 180);
-  return { x: 50 + radius * Math.cos(angle), y: 50 + radius * Math.sin(angle) };
-}
-
-function wedgePath(startAngle: number, endAngle: number) {
-  const start = polarPoint(startAngle, 43);
-  const end = polarPoint(endAngle, 43);
-  return `M 50 50 L ${start.x} ${start.y} A 43 43 0 0 1 ${end.x} ${end.y} Z`;
-}
+import {
+  CAKE_PLATE_ASSET,
+  CAKE_SLICE_ASSETS,
+  PLATE_CENTER,
+  SLICE_IMAGE_SIZE,
+  SLICE_IMAGE_X,
+  SLICE_IMAGE_Y,
+} from "../presentation/cake-assets";
+import { sortSlicesByType } from "../presentation/plate-geometry";
 
 export function Plate({
   plate,
   compact = false,
   rotationDegrees = 0,
+  hiddenSliceIndexes,
 }: {
   plate: PlateType;
   compact?: boolean;
   rotationDegrees?: number;
+  hiddenSliceIndexes?: ReadonlySet<number>;
 }) {
+  const slices = sortSlicesByType(plate.slices);
+  const visibleSliceCount = slices.length - (hiddenSliceIndexes?.size ?? 0);
   const [displayRotation, setDisplayRotation] = useState(0);
 
   useEffect(() => {
@@ -30,26 +31,37 @@ export function Plate({
   }, [rotationDegrees]);
 
   return (
-    <div className={compact ? "plate plate--compact" : "plate"} aria-label={`${plate.slices.length} cake slices`}>
+    <div className={compact ? "plate plate--compact" : "plate"} aria-label={`${visibleSliceCount} cake slices`}>
       <svg viewBox="0 0 100 100" role="img">
-        <circle cx="50" cy="50" r="47" className="plate__dish" />
+        <image
+          href={CAKE_PLATE_ASSET}
+          x="0"
+          y="0"
+          width="100"
+          height="100"
+          className="plate__art"
+        />
         <g
           className="plate__slices"
           style={{ transform: `rotate(${displayRotation}deg)` }}
         >
-          {plate.slices.map((slice, index) => {
-            const startAngle = index * 60;
-            return (
-              <path
-                key={`${slice.cakeTypeId}-${index}`}
-                d={wedgePath(startAngle, startAngle + 60)}
-                fill={CAKE_COLORS[slice.cakeTypeId]}
+          {slices.map((slice, index) => (
+            <g
+              key={`${slice.cakeTypeId}-${index}`}
+              transform={`rotate(${index * 60} ${PLATE_CENTER.x} ${PLATE_CENTER.y})`}
+              opacity={hiddenSliceIndexes?.has(index) ? 0 : 1}
+            >
+              <image
+                href={CAKE_SLICE_ASSETS[slice.cakeTypeId]}
+                x={SLICE_IMAGE_X}
+                y={SLICE_IMAGE_Y}
+                width={SLICE_IMAGE_SIZE}
+                height={SLICE_IMAGE_SIZE}
                 className="plate__slice"
               />
-            );
-          })}
+            </g>
+          ))}
         </g>
-        <circle cx="50" cy="50" r="5" className="plate__center" />
       </svg>
     </div>
   );

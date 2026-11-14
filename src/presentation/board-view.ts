@@ -1,11 +1,12 @@
 import { SLOT_LAYOUT } from "../game/geometry";
-import type { BoardSlot, GameState, SlotId, TransferEvent } from "../game/types";
+import type { BoardSlot, CakeTypeId, GameState, SlotId, TransferEvent } from "../game/types";
 import { getPresentationFrame, getPresentationStep, type Presentation } from "./model";
 import {
+  getIncomingRotation,
   getSliceStartAngle,
   getSourceRotation,
-  getTargetRotation,
   normalizeAngle,
+  sortSlicesByType,
 } from "./plate-geometry";
 
 export type SlotCenter = {
@@ -30,6 +31,12 @@ export type BoardView = {
   arrivedSlotIds: ReadonlySet<SlotId>;
   flights: readonly SliceFlightView[];
   plateRotations: ReadonlyMap<SlotId, number>;
+  hiddenSliceIndexes: ReadonlyMap<SlotId, ReadonlySet<number>>;
+};
+
+type IncomingWedge = {
+  cakeTypeId: CakeTypeId;
+  indexes: number[];
 };
 
 const slotPositions = new Map(SLOT_LAYOUT.map((slot) => [slot.id, slot]));
@@ -43,10 +50,41 @@ export function getSlotCenter(slotId: SlotId): SlotCenter {
   };
 }
 
-function getDisplaySlots(presentation: Presentation): readonly BoardSlot[] {
-  const frameSlots = getPresentationFrame(presentation).slots;
-  if (presentation.phase !== "resolve") return frameSlots;
+function getIncomingWedges(presentation: Presentation, stepIndex: number): ReadonlyMap<SlotId, IncomingWedge> {
+  const incoming = new Map<SlotId, IncomingWedge>();
+  const step = presentation.steps[stepIndex];
+  if (step === undefined) return incoming;
 
+  const counts = new Map<SlotId, { cakeTypeId: CakeTypeId; count: number }>();
+  for (const event of step.events) {
+    if (event.type !== "transfer") continue;
+    const existing = counts.get(event.targetSlotId);
+    if (existing === undefined) {
+      counts.set(event.targetSlotId, { cakeTypeId: event.cakeTypeId, count: event.sliceCount });
+    } else {
+      existing.count += event.sliceCount;
+    }
+  }
+
+  const postSlots = new Map(step.state.slots.map((slot) => [slot.id, slot]));
+  for (const [targetSlotId, { cakeTypeId, count }] of counts) {
+    const postPlate = postSlots.get(targetSlotId)?.plate;
+    if (postPlate === null || postPlate === undefined) continue;
+    const sorted = sortSlicesByType(postPlate.slices);
+    const indexes: number[] = [];
+    for (let index = sorted.length - 1; index >= 0 && indexes.length < count; index -= 1) {
+      if (sorted[index].cakeTypeId === cakeTypeId) indexes.push(index);
+    }
+    incoming.set(targetSlotId, { cakeTypeId, indexes: indexes.reverse() });
+  }
+  return incoming;
+}
+
+function getDisplaySlots(
+  presentation: Presentation,
+  incoming: ReadonlyMap<SlotId, IncomingWedge>,
+): readonly BoardSlot[] {
+  const frameSlots = getPresentationFrame(presentation).slots;
   const step = getPresentationStep(presentation);
   if (step === undefined) return frameSlots;
 
@@ -54,13 +92,15 @@ function getDisplaySlots(presentation: Presentation): readonly BoardSlot[] {
   for (const event of step.events) {
     if (event.type === "transfer") sourceSlotIds.add(event.sourceSlotId);
   }
-  if (sourceSlotIds.size === 0) return frameSlots;
 
-  // Sources empty as their slices take flight; the target only fills once the step ends.
   const postStepSlots = new Map(step.state.slots.map((slot) => [slot.id, slot]));
-  return frameSlots.map((slot) =>
-    sourceSlotIds.has(slot.id) ? postStepSlots.get(slot.id) ?? slot : slot
-  );
+  return frameSlots.map((slot) => {
+    if (incoming.has(slot.id)) return postStepSlots.get(slot.id) ?? slot;
+    if (presentation.phase === "resolve" && sourceSlotIds.has(slot.id)) {
+      return postStepSlots.get(slot.id) ?? slot;
+    }
+    return slot;
+  });
 }
 
 function getArrivedSlotIds(presentation: Presentation): ReadonlySet<SlotId> {
@@ -81,28 +121,37 @@ function getStepRotations(presentation: Presentation, stepIndex: number): Readon
 
   const frame = stepIndex === 0 ? presentation.startState : presentation.steps[stepIndex - 1].state;
   const plates = new Map(frame.slots.map((slot) => [slot.id, slot.plate]));
+  const incoming = getIncomingWedges(presentation, stepIndex);
 
   for (const event of step.events) {
     if (event.type !== "transfer") continue;
     const source = getSlotCenter(event.sourceSlotId);
     const target = getSlotCenter(event.targetSlotId);
     const sourcePlate = plates.get(event.sourceSlotId);
-    const targetPlate = plates.get(event.targetSlotId);
 
-    if (sourcePlate !== null && sourcePlate !== undefined) {
+    if (sourcePlate !== null && sourcePlate !== undefined && !rotations.has(event.sourceSlotId)) {
       rotations.set(
         event.sourceSlotId,
         getSourceRotation(sourcePlate, event.cakeTypeId, source, target),
       );
     }
-    if (targetPlate !== null && targetPlate !== undefined && targetPlate.slices.length < 6) {
-      rotations.set(event.targetSlotId, getTargetRotation(targetPlate, source, target));
+    if (!rotations.has(event.targetSlotId)) {
+      const firstIncoming = incoming.get(event.targetSlotId)?.indexes[0];
+      if (firstIncoming !== undefined) {
+        rotations.set(
+          event.targetSlotId,
+          getIncomingRotation(firstIncoming, source, target),
+        );
+      }
     }
   }
   return rotations;
 }
 
-function getFlights(presentation: Presentation): readonly SliceFlightView[] {
+function getFlights(
+  presentation: Presentation,
+  incoming: ReadonlyMap<SlotId, IncomingWedge>,
+): readonly SliceFlightView[] {
   if (presentation.phase !== "resolve") return [];
   const step = getPresentationStep(presentation);
   if (step === undefined) return [];
@@ -112,25 +161,28 @@ function getFlights(presentation: Presentation): readonly SliceFlightView[] {
     : presentation.steps[presentation.index - 1].state;
   const plates = new Map(frame.slots.map((slot) => [slot.id, slot.plate]));
   const rotations = getStepRotations(presentation, presentation.index);
-  const incomingCounts = new Map<SlotId, number>();
+  const consumed = new Map<SlotId, number>();
   const flights: SliceFlightView[] = [];
 
   for (const event of step.events) {
     if (event.type !== "transfer") continue;
     const sourcePlate = plates.get(event.sourceSlotId);
-    const targetPlate = plates.get(event.targetSlotId);
     if (sourcePlate === null || sourcePlate === undefined) continue;
-    if (targetPlate === null || targetPlate === undefined) continue;
 
     const from = getSlotCenter(event.sourceSlotId);
     const to = getSlotCenter(event.targetSlotId);
     const sourceRotation = rotations.get(event.sourceSlotId) ?? 0;
     const targetRotation = rotations.get(event.targetSlotId) ?? 0;
     const spinFrom = normalizeAngle(getSliceStartAngle(sourcePlate, event.cakeTypeId) + sourceRotation);
-    const firstFreeWedge = targetPlate.slices.length + (incomingCounts.get(event.targetSlotId) ?? 0);
+    const incomingIndexes = incoming.get(event.targetSlotId)?.indexes ?? [];
 
     for (let sliceIndex = 0; sliceIndex < event.sliceCount; sliceIndex += 1) {
-      const freeStart = normalizeAngle((firstFreeWedge + sliceIndex) * 60 + targetRotation);
+      const consumedCount = consumed.get(event.targetSlotId) ?? 0;
+      const incomingIndex = incomingIndexes[consumedCount];
+      consumed.set(event.targetSlotId, consumedCount + 1);
+      if (incomingIndex === undefined) continue;
+
+      const freeStart = normalizeAngle(incomingIndex * 60 + targetRotation);
       let delta = ((freeStart - spinFrom + 540) % 360) - 180;
       if (Math.abs(delta) < 45) delta += delta <= 0 ? -360 : 360;
       flights.push({
@@ -141,11 +193,6 @@ function getFlights(presentation: Presentation): readonly SliceFlightView[] {
         spinTo: spinFrom + delta,
       });
     }
-
-    incomingCounts.set(
-      event.targetSlotId,
-      (incomingCounts.get(event.targetSlotId) ?? 0) + event.sliceCount,
-    );
   }
   return flights;
 }
@@ -162,6 +209,18 @@ function getPlateRotations(presentation: Presentation): ReadonlyMap<SlotId, numb
   return rotations;
 }
 
+function getHiddenSliceIndexes(
+  presentation: Presentation,
+  incoming: ReadonlyMap<SlotId, IncomingWedge>,
+): ReadonlyMap<SlotId, ReadonlySet<number>> {
+  const hidden = new Map<SlotId, ReadonlySet<number>>();
+  if (presentation.phase === "settle") return hidden;
+  for (const [slotId, wedge] of incoming) {
+    hidden.set(slotId, new Set(wedge.indexes));
+  }
+  return hidden;
+}
+
 export function buildBoardView(state: Pick<GameState, "slots">, presentation: Presentation | null): BoardView {
   if (presentation === null) {
     return {
@@ -173,17 +232,21 @@ export function buildBoardView(state: Pick<GameState, "slots">, presentation: Pr
       arrivedSlotIds: new Set(),
       flights: [],
       plateRotations: new Map(),
+      hiddenSliceIndexes: new Map(),
     };
   }
 
   const step = getPresentationStep(presentation);
+  const incoming = presentation.phase === "settle" || step === undefined
+    ? new Map<SlotId, IncomingWedge>()
+    : getIncomingWedges(presentation, presentation.index);
   const clearingSlotIds = new Set<SlotId>();
   for (const event of presentation.phase === "resolve" ? step?.events ?? [] : []) {
     if (event.type === "clear") clearingSlotIds.add(event.slotId);
   }
 
   return {
-    slots: getDisplaySlots(presentation),
+    slots: getDisplaySlots(presentation, incoming),
     isAnimating: true,
     stepIndex: presentation.index,
     placedSlotId: presentation.phase !== "settle" && presentation.index === 0
@@ -191,7 +254,8 @@ export function buildBoardView(state: Pick<GameState, "slots">, presentation: Pr
       : null,
     clearingSlotIds,
     arrivedSlotIds: getArrivedSlotIds(presentation),
-    flights: getFlights(presentation),
+    flights: getFlights(presentation, incoming),
     plateRotations: getPlateRotations(presentation),
+    hiddenSliceIndexes: getHiddenSliceIndexes(presentation, incoming),
   };
 }

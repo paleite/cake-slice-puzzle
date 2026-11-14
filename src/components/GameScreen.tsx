@@ -1,9 +1,17 @@
 import { useState } from "react";
+import { CAKE_TYPES, type Plate as PlateType } from "../game/types";
+import { CAKE_SLICE_ASSETS } from "../presentation/cake-assets";
 import { buildHudView } from "../presentation/hud-view";
 import { useGameStore } from "../store/game-store";
 import { GameBoard } from "./GameBoard";
+import { Plate } from "./Plate";
 import { Tray } from "./Tray";
 import { usePresentationDriver } from "./use-presentation-driver";
+
+const HERO_PLATE: PlateType = {
+  id: "hero",
+  slices: CAKE_TYPES.map((cakeTypeId) => ({ cakeTypeId })),
+};
 
 export function GameScreen() {
   usePresentationDriver();
@@ -33,6 +41,7 @@ export function GameScreen() {
           aria-haspopup="menu"
           onClick={() => setMenuOpen((open) => !open)}
         >
+          <img src={CAKE_SLICE_ASSETS.strawberry} className="hud__title-icon" alt="" />
           Cake Slice <span aria-hidden="true">⌄</span>
         </button>
         <div className="hud__right">
@@ -66,6 +75,7 @@ export function GameScreen() {
       {hud.phase === "complete" && (
         <div className="game-over" role="dialog" aria-modal="true" aria-label="Game over">
           <div className="game-over__card">
+            <div className="game-over__cake" aria-hidden="true"><Plate plate={HERO_PLATE} /></div>
             <span className="hud__eyebrow">Game over</span>
             <h1>{score.toLocaleString()}</h1>
             <p>{cakesCleared} complete cakes cleared</p>

@@ -14,9 +14,9 @@ export default defineConfig({
       manifest: {
         name: "Cake Slice Puzzle",
         short_name: "Cake Puzzle",
-        description: "Place plates, consolidate matching cake slices, and clear complete cakes.",
-        theme_color: "#fff6e9",
-        background_color: "#fff6e9",
+        description: "A kawaii isometric cake-slice sorting puzzle.",
+        theme_color: "#ffe8d5",
+        background_color: "#ffe8d5",
         display: "standalone",
         orientation: "portrait",
         start_url: base,

@@ -22,8 +22,9 @@ pnpm preview
 - `src/presentation/` — pure presentation model: phase, step timing, frame projection, board/HUD/tray view builders, palette. No React.
 - `src/store/` — wiring: owns domain state plus the ephemeral presentation queue; persists domain state only.
 - `src/components/` — rendering: one driver advances presentation beats; components map view builders to markup.
+- `src/assets/` — generated kawaii isometric cake slices, plate, background tile, and the bundled rounded UI font.
 
-A presentation beat is `rotate` → `resolve` → `settle`. The rotate beat turns the outgoing slice toward the target (and the target's free wedge toward the source); the resolve beat flies merged slices into the target's free wedges or clears a completed cake; the settle beat returns plates to their base orientation. Rotation angles are derived from board geometry and plate slice order, never persisted. Plates render slices in arrival order, so a landed slice stays in the wedge it flew into instead of being re-sorted under it.
+A presentation beat is `rotate` → `resolve` → `settle`. The rotate beat turns the outgoing slice toward the target and shows the target's final color-sorted arrangement with the incoming wedges hidden. The resolve beat flies each slice into its hidden target wedge or clears a completed cake. The settle beat returns plates to their base orientation. Rotation angles are derived from board geometry and plate slice order, never persisted. Because target gaps are placed at each incoming slice's final sorted position, colors finish grouped and slices do not re-sort under the landing.
 
 ## Current v1 resolver rule
 

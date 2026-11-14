@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="title desc">
+  <title id="title">Kawaii ceramic cake plate</title>
+  <desc id="desc">Empty chunky isometric warm-cream plate with peach rim and soft shadow.</desc>
+  <defs>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f5a681"/><stop offset="1" stop-color="#d97c68"/></linearGradient>
+    <radialGradient id="dish" cx="36%" cy="24%"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#f4dfc8"/></radialGradient>
+  </defs>
+  <ellipse cx="100" cy="163" rx="82" ry="18" fill="#5b3a2e" opacity=".15"/>
+  <path d="M15 106 C15 75 53 53 100 53 C147 53 185 75 185 106 L185 120 C185 151 147 171 100 171 C53 171 15 151 15 120Z" fill="url(#edge)" stroke="#5b3a2e" stroke-width="6" stroke-linejoin="round"/>
+  <ellipse cx="100" cy="104" rx="85" ry="52" fill="#ffd1b6" stroke="#5b3a2e" stroke-width="6"/>
+  <ellipse cx="100" cy="101" rx="69" ry="39" fill="url(#dish)" stroke="#e89a7d" stroke-width="5"/>
+  <path d="M45 88 C57 68 91 59 119 65" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".65"/>
+</svg>

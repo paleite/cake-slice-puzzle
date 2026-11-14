@@ -1,6 +1,13 @@
 import type { CSSProperties } from "react";
+import {
+  CAKE_PLATE_ASSET,
+  CAKE_SLICE_ASSETS,
+  PLATE_CENTER,
+  SLICE_IMAGE_SIZE,
+  SLICE_IMAGE_X,
+  SLICE_IMAGE_Y,
+} from "../presentation/cake-assets";
 import { buildBoardView } from "../presentation/board-view";
-import { CAKE_COLORS } from "../presentation/palette";
 import { STEP_TIMING } from "../presentation/timing";
 import { useGameStore } from "../store/game-store";
 import { Plate } from "./Plate";
@@ -26,6 +33,7 @@ export function GameBoard() {
     >
       {view.slots.map((slot) => {
         const classNames = ["board-slot", `board-slot--${slot.id}`];
+        if (slot.plate === null) classNames.push("board-slot--empty");
         if (!view.isAnimating && slot.plate === null && selectedPlateId !== null) classNames.push("board-slot--available");
         if (view.clearingSlotIds.has(slot.id)) classNames.push("board-slot--clearing");
         if (view.arrivedSlotIds.has(slot.id)) classNames.push("board-slot--arrived");
@@ -33,9 +41,13 @@ export function GameBoard() {
         if (view.plateRotations.has(slot.id)) classNames.push("board-slot--rotating");
 
         const slotName = `row ${slot.row + 1}, column ${slot.column + 1}`;
+        const hiddenSliceIndexes = view.hiddenSliceIndexes.get(slot.id);
+        const visibleSliceCount = slot.plate === null
+          ? 0
+          : slot.plate.slices.length - (hiddenSliceIndexes?.size ?? 0);
         const label = slot.plate === null
           ? `Empty slot, ${slotName}`
-          : `Slot, ${slotName}: ${slot.plate.slices.length} cake slices`;
+          : `Slot, ${slotName}: ${visibleSliceCount} cake slices`;
 
         return (
           <button
@@ -47,8 +59,19 @@ export function GameBoard() {
             aria-label={label}
           >
             {slot.plate !== null
-              ? <Plate plate={slot.plate} rotationDegrees={view.plateRotations.get(slot.id) ?? 0} />
-              : <span className="board-slot__empty" aria-hidden="true">+</span>}
+              ? (
+                <Plate
+                  plate={slot.plate}
+                  rotationDegrees={view.plateRotations.get(slot.id) ?? 0}
+                  hiddenSliceIndexes={hiddenSliceIndexes}
+                />
+              )
+              : (
+                <>
+                  <img src={CAKE_PLATE_ASSET} className="board-slot__ghost" alt="" aria-hidden="true" draggable={false} />
+                  <span className="board-slot__empty" aria-hidden="true">+</span>
+                </>
+              )}
           </button>
         );
       })}
@@ -68,11 +91,15 @@ export function GameBoard() {
               "--spin-to": `${spinTo}deg`,
             } as CSSProperties}
           >
-            <path
-              d="M 50 50 L 50 7 A 43 43 0 0 1 87 71 Z"
-              className="slice-flight__wedge"
-              fill={CAKE_COLORS[event.cakeTypeId]}
-            />
+            <g className="slice-flight__spin">
+              <image
+                href={CAKE_SLICE_ASSETS[event.cakeTypeId]}
+                x={SLICE_IMAGE_X}
+                y={SLICE_IMAGE_Y}
+                width={SLICE_IMAGE_SIZE}
+                height={SLICE_IMAGE_SIZE}
+              />
+            </g>
           </svg>
         ))}
       </div>

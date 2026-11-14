@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 import type { CakeTypeId, Plate } from "../game/types";
 import {
   getDirectionDegrees,
-  getFreeWedgeCenterAngle,
+  getIncomingRotation,
   getSliceCenterAngle,
   getSliceStartAngle,
   getSourceRotation,
-  getTargetRotation,
   normalizeAngle,
+  normalizeSignedAngle,
+  sortSlicesByType,
 } from "./plate-geometry";
 
 function plate(types: CakeTypeId[]): Plate {
@@ -19,18 +20,25 @@ function normalize(degrees: number): number {
 }
 
 describe("plate geometry", () => {
-  it("derives wedge angles from arrival order", () => {
+  it("sorts slices by color and derives sorted wedge angles", () => {
     const mixed = plate(["strawberry", "lemon"]);
-    expect(getSliceStartAngle(mixed, "strawberry")).toBe(0);
-    expect(getSliceStartAngle(mixed, "lemon")).toBe(60);
-    expect(getSliceCenterAngle(mixed, "strawberry")).toBe(30);
-    expect(getSliceCenterAngle(mixed, "lemon")).toBe(90);
-    expect(getFreeWedgeCenterAngle(plate(Array<CakeTypeId>(5).fill("strawberry")))).toBe(330);
+    expect(sortSlicesByType(mixed.slices).map((slice) => slice.cakeTypeId)).toEqual(["lemon", "strawberry"]);
+    expect(getSliceStartAngle(mixed, "lemon")).toBe(0);
+    expect(getSliceStartAngle(mixed, "strawberry")).toBe(60);
+    expect(getSliceCenterAngle(mixed, "lemon")).toBe(30);
+    expect(getSliceCenterAngle(mixed, "strawberry")).toBe(90);
     expect(normalizeAngle(-120)).toBe(240);
     expect(normalizeAngle(420)).toBe(60);
+    expect(normalizeSignedAngle(-240)).toBe(120);
   });
 
-  it("points the outgoing slice at the target and the free wedge back at the source", () => {
+  it("aligns a sorted target wedge with the source", () => {
+    const source = { x: 37.5, y: 10 };
+    const target = { x: 12.5, y: 10 };
+    expect(getIncomingRotation(5, source, target)).toBe(120);
+  });
+
+  it("points the outgoing slice at the target", () => {
     const source = { x: 37.5, y: 10 };
     const target = { x: 12.5, y: 10 };
     const direction = getDirectionDegrees(source, target);
@@ -41,13 +49,6 @@ describe("plate geometry", () => {
     expect(sourceRotation).toBe(-120);
     expect(normalize(getSliceCenterAngle(sourcePlate, "strawberry") + sourceRotation)).toBe(
       normalize(direction),
-    );
-
-    const targetPlate = plate(Array<CakeTypeId>(5).fill("strawberry"));
-    const targetRotation = getTargetRotation(targetPlate, source, target);
-    expect(targetRotation).toBe(120);
-    expect(normalize(getFreeWedgeCenterAngle(targetPlate) + targetRotation)).toBe(
-      normalize(getDirectionDegrees(target, source)),
     );
   });
 
