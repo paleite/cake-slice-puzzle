@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createEmptySlots } from "../game/geometry";
 import type { CakeTypeId, ClearEvent, GameState, Plate, ResolveStep, SlotId, TransferEvent } from "../game/types";
 import { buildBoardView, getSlotCenter } from "./board-view";
+import { resolveBoard } from "../game/resolver";
 import type { Presentation, PresentationPhase } from "./model";
 
 function plate(id: string, types: CakeTypeId[]): Plate {
@@ -150,6 +151,51 @@ describe("board view", () => {
     expect(view.clearingSlotIds.has("b1")).toBe(true);
     expect(view.arrivedSlotIds.has("b1")).toBe(true);
     expect(view.flights).toEqual([]);
+  });
+
+
+  it("keeps the two-way blueberry/strawberry swap rotations aligned", () => {
+    const start = state({
+      a0: plate("orange-five", ["orange", "orange", "orange", "orange", "orange"]),
+      a1: plate("origin", ["blueberry", "strawberry", "orange"]),
+      a2: plate("right", ["blueberry", "strawberry"]),
+    });
+    const result = resolveBoard(start, "a1");
+    const base: Presentation = {
+      id: 12,
+      placedSlotId: "a1",
+      startState: start,
+      steps: result.steps,
+      index: 2,
+      phase: "rotate",
+    };
+
+    const blueRotate = buildBoardView({ slots: [] }, base);
+    expect(blueRotate.plateRotations.get("a1")).toBe(0);
+    expect(blueRotate.plateRotations.get("a2")).toBe(-120);
+
+    const blueResolve = buildBoardView({ slots: [] }, { ...base, phase: "resolve" });
+    expect(blueResolve.flights.map((flight) => [
+      flight.event.sourceSlotId,
+      flight.event.targetSlotId,
+      flight.event.cakeTypeId,
+      flight.spinFrom,
+      flight.spinTo,
+    ])).toEqual([["a2", "a1", "blueberry", 240, 60]]);
+
+    const red: Presentation = { ...base, index: 3 };
+    const redRotate = buildBoardView({ slots: [] }, red);
+    expect(redRotate.plateRotations.get("a1")).toBe(-60);
+    expect(redRotate.plateRotations.get("a2")).toBe(180);
+
+    const redResolve = buildBoardView({ slots: [] }, { ...red, phase: "resolve" });
+    expect(redResolve.flights.map((flight) => [
+      flight.event.sourceSlotId,
+      flight.event.targetSlotId,
+      flight.event.cakeTypeId,
+      flight.spinFrom,
+      flight.spinTo,
+    ])).toEqual([["a1", "a2", "strawberry", 60, -120]]);
   });
 
   it("settles plates back to their base rotation after the final step", () => {

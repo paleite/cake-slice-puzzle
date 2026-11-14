@@ -3,6 +3,7 @@ import type { CakeTypeId, Plate } from "../game/types";
 import {
   getDirectionDegrees,
   getIncomingRotation,
+  getRotationDelta,
   getSliceCenterAngle,
   getSliceStartAngle,
   getSourceRotation,
@@ -58,5 +59,12 @@ describe("plate geometry", () => {
     expect(getDirectionDegrees(center, { x: 100, y: 50 })).toBe(90);
     expect(getDirectionDegrees(center, { x: 50, y: 100 })).toBe(180);
     expect(getDirectionDegrees(center, { x: 0, y: 50 })).toBe(-90);
+  });
+
+  it("takes the short way around between consecutive plate rotations", () => {
+    expect(getRotationDelta(-120, 180)).toBe(-60);
+    expect(getRotationDelta(350, 10)).toBe(20);
+    expect(getRotationDelta(10, 350)).toBe(-20);
+    expect(getRotationDelta(-60, 0)).toBe(60);
   });
 });

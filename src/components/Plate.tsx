@@ -9,7 +9,7 @@ import {
   SLICE_IMAGE_X,
   SLICE_IMAGE_Y,
 } from "../presentation/cake-assets";
-import { sortSlicesByType } from "../presentation/plate-geometry";
+import { getRotationDelta, sortSlicesByType } from "../presentation/plate-geometry";
 
 function Face({ medallion = false }: { medallion?: boolean }) {
   return (
@@ -103,7 +103,11 @@ export function Plate({
     .filter((index) => !hiddenSliceIndexes?.has(index));
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => setDisplayRotation(rotationDegrees));
+    const frame = requestAnimationFrame(() => {
+      // A plate can be a source, target, then source again across consecutive beats.
+      // Always animate the shortest visual arc instead of unwinding through 300°.
+      setDisplayRotation((current) => current + getRotationDelta(current, rotationDegrees));
+    });
     return () => cancelAnimationFrame(frame);
   }, [rotationDegrees]);
 

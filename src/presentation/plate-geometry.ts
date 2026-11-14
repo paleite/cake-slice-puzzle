@@ -17,6 +17,10 @@ export function normalizeAngle(degrees: number): number {
   return ((degrees % 360) + 360) % 360;
 }
 
+export function getRotationDelta(fromDegrees: number, toDegrees: number): number {
+  return normalizeSignedAngle(toDegrees - fromDegrees);
+}
+
 export function getSliceStartAngle(plate: Plate, cakeTypeId: CakeTypeId): number {
   const index = sortSlicesByType(plate.slices).findIndex((slice) => slice.cakeTypeId === cakeTypeId);
   return (index < 0 ? 0 : index) * DEGREES_PER_WEDGE;

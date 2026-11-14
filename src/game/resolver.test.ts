@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createEmptySlots } from "./geometry";
 import { resolveBoard } from "./resolver";
-import { findMergeCandidate } from "./transfers";
 import type { CakeTypeId, GameState, Plate, SlotId } from "./types";
 
 function plate(id: string, cakeTypeIds: CakeTypeId[]): Plate {
@@ -65,10 +64,9 @@ describe("resolveBoard matching propagation", () => {
 
     expect(result.events.map((event) => event.type === "transfer"
       ? `${event.sourceSlotId}>${event.targetSlotId}x${event.sliceCount}`
-      : `clear:${event.slotId}`)).toEqual(["a2>a1x1", "clear:a1", "b2>b1x1"]);
-    expect(cakeTypesAt(result.state, "b1")).toEqual(["strawberry", "lemon", "strawberry"]);
-    expect(cakeTypesAt(result.state, "b2")).toEqual([]);
-    expect(findMergeCandidate(result.state, "b1", new Set())).toBeNull();
+      : `clear:${event.slotId}`)).toEqual(["a2>a1x1", "clear:a1", "b1>b2x1"]);
+    expect(cakeTypesAt(result.state, "b1")).toEqual(["lemon"]);
+    expect(cakeTypesAt(result.state, "b2")).toEqual(["strawberry", "strawberry"]);
   });
 
   it("groups resolution events into ordered animation steps", () => {
@@ -97,5 +95,27 @@ describe("resolveBoard matching propagation", () => {
     expect(cakeTypesAt(result.state, "c2")).toEqual([]);
     expect(cakeTypesAt(result.state, "d2")).toEqual([]);
     expect(cakeTypesAt(result.state, "c3")).toEqual(["strawberry", "strawberry", "strawberry", "strawberry"]);
+  });
+
+  it("clears the full orange target, then swaps blueberry and strawberry between the remaining pair", () => {
+    const result = resolveBoard(state({
+      a0: plate("orange-five", ["orange", "orange", "orange", "orange", "orange"]),
+      a1: plate("origin", ["blueberry", "strawberry", "orange"]),
+      a2: plate("right", ["blueberry", "strawberry"]),
+    }), "a1");
+
+    expect(result.events.map((event) => event.type === "transfer"
+      ? `${event.sourceSlotId}>${event.targetSlotId}x${event.sliceCount}:${event.cakeTypeId}`
+      : `clear:${event.slotId}`)).toEqual([
+      "a1>a0x1:orange",
+      "clear:a0",
+      "a2>a1x1:blueberry",
+      "a1>a2x1:strawberry",
+    ]);
+    expect(cakeTypesAt(result.state, "a0")).toEqual([]);
+    expect(cakeTypesAt(result.state, "a1")).toEqual(["blueberry", "blueberry"]);
+    expect(cakeTypesAt(result.state, "a2")).toEqual(["strawberry", "strawberry"]);
+    expect(result.state.cakesCleared).toBe(1);
+    expect(result.state.score).toBe(100);
   });
 });

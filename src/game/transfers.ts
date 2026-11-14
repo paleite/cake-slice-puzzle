@@ -47,7 +47,11 @@ function selectMergeTargetSlotId(state: GameState, component: readonly SlotId[],
   const eligible = component.filter((slotId) => getFreeCapacity(state, slotId) > 0);
   eligible.sort((left, right) => {
     const countDifference = countType(state, right, cakeTypeId) - countType(state, left, cakeTypeId);
-    return countDifference || ((slotOrder.get(left) ?? Number.MAX_SAFE_INTEGER) - (slotOrder.get(right) ?? Number.MAX_SAFE_INTEGER));
+    // Equal groups sort into the plate with the most room, so two mixed plates can
+    // exchange different colors in opposite directions instead of overfilling one.
+    const capacityDifference = getFreeCapacity(state, right) - getFreeCapacity(state, left);
+    return countDifference || capacityDifference
+      || ((slotOrder.get(left) ?? Number.MAX_SAFE_INTEGER) - (slotOrder.get(right) ?? Number.MAX_SAFE_INTEGER));
   });
   return eligible[0] ?? null;
 }
