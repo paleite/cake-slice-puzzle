@@ -45,22 +45,24 @@ export function Plate({
           className="plate__slices"
           style={{ transform: `rotate(${displayRotation}deg)` }}
         >
-          {slices.map((slice, index) => (
-            <g
-              key={`${slice.cakeTypeId}-${index}`}
-              transform={`rotate(${index * 60} ${PLATE_CENTER.x} ${PLATE_CENTER.y})`}
-              opacity={hiddenSliceIndexes?.has(index) ? 0 : 1}
-            >
-              <image
-                href={CAKE_SLICE_ASSETS[slice.cakeTypeId]}
-                x={SLICE_IMAGE_X}
-                y={SLICE_IMAGE_Y}
-                width={SLICE_IMAGE_SIZE}
-                height={SLICE_IMAGE_SIZE}
-                className="plate__slice"
-              />
-            </g>
-          ))}
+          {slices.map((slice, index) => {
+            if (hiddenSliceIndexes?.has(index)) return null;
+            return (
+              <g
+                key={`${slice.cakeTypeId}-${index}`}
+                transform={`rotate(${index * 60} ${PLATE_CENTER.x} ${PLATE_CENTER.y})`}
+              >
+                <image
+                  href={CAKE_SLICE_ASSETS[slice.cakeTypeId]}
+                  x={SLICE_IMAGE_X}
+                  y={SLICE_IMAGE_Y}
+                  width={SLICE_IMAGE_SIZE}
+                  height={SLICE_IMAGE_SIZE}
+                  className="plate__slice"
+                />
+              </g>
+            );
+          })}
         </g>
       </svg>
     </div>

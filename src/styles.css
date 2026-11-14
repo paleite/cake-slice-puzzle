@@ -189,7 +189,6 @@ button:focus-visible {
 .slice-flight__spin {
   transform-origin: 50px 56px;
   animation: slice-flight-spin var(--flight-ms) ease-in-out both;
-  filter: drop-shadow(0 6px 4px rgb(103 53 32 / 18%));
 }
 .slice-flight__spin image { pointer-events: none; }
 
@@ -221,8 +220,7 @@ button:focus-visible {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  opacity: .22;
-  filter: saturate(.55) drop-shadow(0 3px 3px rgb(120 67 40 / 8%));
+  opacity: .18;
   pointer-events: none;
 }
 .board-slot:disabled { opacity: 1; }
@@ -248,7 +246,6 @@ button:focus-visible {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  filter: drop-shadow(0 5px 4px rgb(122 63 38 / 14%));
 }
 .plate svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .plate__slices {
@@ -256,7 +253,7 @@ button:focus-visible {
   transform-origin: 50% 50%;
   transition: transform var(--rotate-ms, 150ms) cubic-bezier(.2, .9, .25, 1.12);
 }
-.plate--compact { width: 100%; filter: drop-shadow(0 4px 4px rgb(122 63 38 / 12%)); }
+.plate--compact { width: 100%; }
 .plate__art { pointer-events: none; }
 .plate__slice { pointer-events: none; }
 
@@ -336,8 +333,7 @@ button:focus-visible {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgb(71 37 27 / 48%);
-  backdrop-filter: blur(7px);
+  background: rgb(71 37 27 / 62%);
   overscroll-behavior: contain;
 }
 .game-over__card {
@@ -353,7 +349,7 @@ button:focus-visible {
   box-shadow: 0 9px 0 #e8b99f, 0 28px 80px rgb(66 31 19 / 32%);
   text-align: center;
 }
-.game-over__cake { width: 156px; margin: -6px auto 0; filter: drop-shadow(0 9px 9px rgb(122 63 38 / 18%)); }
+.game-over__cake { width: 156px; margin: -6px auto 0; }
 .game-over__card h1 { margin: 0; font-size: 2.7rem; font-weight: 600; text-wrap: balance; font-variant-numeric: tabular-nums; }
 .game-over__card p { margin: 0 0 10px; color: var(--muted); font-weight: 400; }
 .game-over__card button {
@@ -369,6 +365,37 @@ button:focus-visible {
 }
 .game-over__card button:hover { filter: brightness(1.03); transform: translateY(-1px); }
 .game-over__card button:active { transform: translateY(3px); box-shadow: 0 2px 0 #d94f70; }
+
+.update-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 9px 8px 14px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #fffaf1;
+  box-shadow: 0 8px 22px rgb(102 53 33 / 20%);
+  transform: translateX(-50%);
+  color: var(--ink);
+  font-size: .82rem;
+  white-space: nowrap;
+}
+.update-toast button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 999px;
+  background: #ff7d9a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.update-toast .update-toast__later { background: transparent; color: var(--muted); }
 
 @keyframes slice-flight {
   0% { left: var(--from-x); top: var(--from-y); opacity: 1; }

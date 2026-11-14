@@ -7,6 +7,7 @@ import { GameBoard } from "./GameBoard";
 import { Plate } from "./Plate";
 import { Tray } from "./Tray";
 import { usePresentationDriver } from "./use-presentation-driver";
+import { UpdateToast } from "./UpdateToast";
 
 const HERO_PLATE: PlateType = {
   id: "hero",
@@ -53,6 +54,7 @@ export function GameScreen() {
       <div className="event-banner" aria-live="polite">{hud.message}</div>
       <GameBoard />
       <Tray />
+      <UpdateToast />
 
       {menuOpen && (
         <div className="game-menu" role="menu" aria-label="Game menu">

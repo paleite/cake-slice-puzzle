@@ -6,11 +6,13 @@ const base = "/cake-slice-puzzle/";
 
 export default defineConfig({
   base,
+  build: {
+    assetsInlineLimit: 0,
+  },
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
-      includeAssets: ["icon.svg"],
+      registerType: "prompt",
       manifest: {
         name: "Cake Slice Puzzle",
         short_name: "Cake Puzzle",
@@ -30,7 +32,9 @@ export default defineConfig({
         ]
       },
       workbox: {
-        navigateFallback: `${base}index.html`
+        navigateFallback: `${base}index.html`,
+        globPatterns: ["**/*.{js,css,html,svg,woff2}"],
+        clientsClaim: true,
       }
     })
   ]
