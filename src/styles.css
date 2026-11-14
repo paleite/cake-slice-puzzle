@@ -82,6 +82,17 @@ button:focus-visible {
   background: linear-gradient(180deg, #fffdf8, #fff2e2);
   box-shadow: 0 4px 0 #f1cdb8, 0 12px 22px rgb(143 82 45 / 10%);
 }
+.hud > .hud__center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
 .hud__right { text-align: right; }
 .hud__eyebrow {
   color: #a37c6f;
@@ -110,6 +121,7 @@ button:focus-visible {
   font-size: .92rem;
   font-weight: 600;
   letter-spacing: .02em;
+  white-space: nowrap;
   text-shadow: 0 1px 0 rgb(143 33 55 / 25%);
 }
 .hud__title-icon { width: 25px; height: 25px; object-fit: contain; filter: drop-shadow(0 2px 2px rgb(98 34 42 / 28%)); }
@@ -117,6 +129,25 @@ button:focus-visible {
 .hud__menu-trigger:hover { filter: brightness(1.03); transform: translateY(-1px); }
 .hud__menu-trigger span { display: inline-block; margin-left: 1px; color: rgb(255 255 255 / 78%); font-size: 1rem; transition: transform 130ms ease; }
 .hud__menu-trigger[aria-expanded="true"] span { transform: rotate(180deg); }
+.hud__undo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1.5px solid #fff;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf8, #fff0df);
+  box-shadow: 0 4px 0 #f1cdb8, 0 10px 18px rgb(143 82 45 / 10%);
+  color: #8a6258;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease;
+}
+.hud__undo:hover:not(:disabled) { filter: brightness(1.03); transform: translateY(-1px); }
+.hud__undo:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #f1cdb8; }
+.hud__undo:disabled { opacity: .45; cursor: not-allowed; box-shadow: 0 3px 0 #f1cdb8; }
+.hud__undo-icon { font-size: 1.05rem; line-height: 1; }
 
 .event-banner {
   min-height: 34px;
@@ -426,6 +457,15 @@ button:focus-visible {
 
 @media (min-width: 480px) {
   .game-shell { padding-inline: 24px; }
+}
+
+@media (max-width: 380px) {
+  .hud { gap: 4px; }
+  .hud > div { padding: 7px 9px; }
+  .hud__title { padding: 8px 10px 8px 8px; font-size: .82rem; }
+  .hud__title-icon { width: 21px; height: 21px; }
+  .hud__undo { padding: 9px 10px; }
+  .hud__undo-label { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

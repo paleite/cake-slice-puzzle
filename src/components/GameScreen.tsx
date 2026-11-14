@@ -22,7 +22,10 @@ export function GameScreen() {
   const status = useGameStore((state) => state.game.status);
   const lastEvents = useGameStore((state) => state.lastEvents);
   const presentation = useGameStore((state) => state.presentation);
+  const historyLength = useGameStore((state) => state.history.length);
+  const undo = useGameStore((state) => state.undo);
   const restart = useGameStore((state) => state.restart);
+  const canUndo = historyLength > 0 && presentation === null;
 
   const hud = buildHudView({ score, cakesCleared, status }, presentation, lastEvents);
 
@@ -35,16 +38,35 @@ export function GameScreen() {
             {hud.score.toLocaleString()}
           </strong>
         </div>
-        <button
-          type="button"
-          className="hud__title hud__menu-trigger"
-          aria-expanded={menuOpen}
-          aria-haspopup="menu"
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          <img src={CAKE_SLICE_ASSETS.strawberry} className="hud__title-icon" alt="" />
-          Cake Slice <span aria-hidden="true">⌄</span>
-        </button>
+        <div className="hud__center">
+          <button
+            type="button"
+            className="hud__title hud__menu-trigger"
+            aria-expanded={menuOpen}
+            aria-haspopup="menu"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <img src={CAKE_SLICE_ASSETS.strawberry} className="hud__title-icon" alt="" />
+            Cake Slice <span aria-hidden="true">⌄</span>
+          </button>
+          <button
+            type="button"
+            className="hud__undo"
+            onClick={undo}
+            disabled={!canUndo}
+            aria-label="Undo last step"
+            title={
+              presentation !== null
+                ? "Wait for the cake to finish"
+                : canUndo
+                  ? "Undo last step"
+                  : "Nothing to undo"
+            }
+          >
+            <span className="hud__undo-icon" aria-hidden="true">↶</span>
+            <span className="hud__undo-label">Undo</span>
+          </button>
+        </div>
         <div className="hud__right">
           <span className="hud__eyebrow">Cleared</span>
           <strong className="hud__value">{hud.cakesCleared}</strong>
