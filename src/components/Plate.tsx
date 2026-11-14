@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from "react";
+import { GAME_CONFIG } from "../game/config";
 import type { Plate as PlateType } from "../game/types";
 import {
   CAKE_PERSPECTIVE_TRANSFORM,
@@ -92,6 +93,7 @@ export function Plate({
 }) {
   const slices = sortSlicesByType(plate.slices);
   const visibleSliceCount = slices.length - (hiddenSliceIndexes?.size ?? 0);
+  const isFullCake = slices.length === GAME_CONFIG.plateCapacity;
   const [displayRotation, setDisplayRotation] = useState(0);
   const rawId = useId();
   const uid = rawId.replace(/[^a-zA-Z0-9_-]/g, "");
@@ -173,11 +175,6 @@ export function Plate({
                     height={SLICE_IMAGE_SIZE}
                     className="plate__slice"
                   />
-                  {visibleSliceCount === 1 && (
-                    <g transform="translate(50 34.5)">
-                      <Face />
-                    </g>
-                  )}
                 </g>
               );
             })}
@@ -199,7 +196,7 @@ export function Plate({
               />
             </g>
           ))}
-          {visibleSliceCount > 1 && (
+          {isFullCake && (
             <g className="plate__face" transform={`translate(${PLATE_CENTER.x} ${PLATE_CENTER.y})`}>
               <Face medallion />
             </g>

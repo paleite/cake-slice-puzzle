@@ -4,22 +4,32 @@ import { registerSW } from "virtual:pwa-register";
 import { App } from "./App";
 import "./styles.css";
 
-let updateRequested = false;
+// prompt mode keeps updates from reloading the running game; Workbox skipWaiting
+// activates the new service worker so a normal page refresh picks up the new build.
+function syncAppHeight() {
+  const height = window.visualViewport?.height ?? window.innerHeight;
+  document.documentElement.style.setProperty("--app-height", `${Math.round(height)}px`);
+}
+syncAppHeight();
+window.visualViewport?.addEventListener("resize", syncAppHeight);
+window.visualViewport?.addEventListener("scroll", syncAppHeight);
+window.addEventListener("orientationchange", syncAppHeight);
+window.addEventListener("resize", syncAppHeight);
 
+let hadController = navigator.serviceWorker?.controller != null;
 navigator.serviceWorker?.addEventListener("controllerchange", () => {
-  if (updateRequested) window.location.reload();
+  if (!hadController) {
+    hadController = true;
+    return;
+  }
+  window.location.reload();
 });
 
-const updateSW = registerSW({
+registerSW({
   immediate: true,
-  onNeedRefresh() {
-    window.dispatchEvent(new Event("cake:pwa-update-ready"));
+  onRegisteredSW(_swUrl, registration) {
+    void registration?.update();
   },
-});
-
-window.addEventListener("cake:pwa-update", () => {
-  updateRequested = true;
-  void updateSW(true);
 });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

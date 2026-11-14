@@ -32,9 +32,21 @@ export default defineConfig({
         ]
       },
       workbox: {
-        navigateFallback: `${base}index.html`,
         globPatterns: ["**/*.{js,css,html,svg,woff2}"],
         clientsClaim: true,
+        skipWaiting: true,
+        cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "cake-pages",
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 4, maxAgeSeconds: 7 * 24 * 60 * 60 },
+            },
+          },
+        ],
       }
     })
   ]
