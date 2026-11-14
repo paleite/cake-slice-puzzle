@@ -1,8 +1,11 @@
 import type { ResolveStep } from "../game/types";
+import type { Presentation } from "./model";
 
 export const STEP_TIMING = {
-  transferMs: 560,
-  clearMs: 680,
+  rotateMs: 260,
+  transferMs: 380,
+  clearMs: 660,
+  settleMs: 280,
 } as const;
 
 export function getStepDurationMs(step: ResolveStep | undefined): number {
@@ -10,4 +13,10 @@ export function getStepDurationMs(step: ResolveStep | undefined): number {
   return step.events.some((event) => event.type === "clear")
     ? STEP_TIMING.clearMs
     : STEP_TIMING.transferMs;
+}
+
+export function getBeatDurationMs(presentation: Presentation): number {
+  if (presentation.phase === "rotate") return STEP_TIMING.rotateMs;
+  if (presentation.phase === "settle") return STEP_TIMING.settleMs;
+  return getStepDurationMs(presentation.steps[presentation.index]);
 }

@@ -151,6 +151,11 @@ button:focus-visible {
 
 .plate { width: 92%; aspect-ratio: 1; filter: drop-shadow(0 4px 5px rgb(63 39 25 / 16%)); }
 .plate svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.plate__slices {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  transition: transform var(--rotate-ms, 260ms) cubic-bezier(.34, 1.4, .64, 1);
+}
 .plate__dish { fill: #fffdfa; stroke: #dccbbc; stroke-width: 4; }
 .plate__slice { stroke: #fff8ee; stroke-width: 2; transform-origin: 50px 50px; }
 .plate__center { fill: #fff8ee; stroke: rgb(67 45 32 / 12%); stroke-width: 1; }

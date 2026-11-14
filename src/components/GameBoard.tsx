@@ -19,6 +19,7 @@ export function GameBoard() {
       aria-label="Cake board"
       aria-busy={view.isAnimating}
       style={{
+        "--rotate-ms": `${STEP_TIMING.rotateMs}ms`,
         "--flight-ms": `${STEP_TIMING.transferMs}ms`,
         "--clear-ms": `${STEP_TIMING.clearMs}ms`,
       } as CSSProperties}
@@ -29,6 +30,7 @@ export function GameBoard() {
         if (view.clearingSlotIds.has(slot.id)) classNames.push("board-slot--clearing");
         if (view.arrivedSlotIds.has(slot.id)) classNames.push("board-slot--arrived");
         if (view.placedSlotId === slot.id) classNames.push("board-slot--placed");
+        if (view.plateRotations.has(slot.id)) classNames.push("board-slot--rotating");
 
         const slotName = `row ${slot.row + 1}, column ${slot.column + 1}`;
         const label = slot.plate === null
@@ -44,7 +46,9 @@ export function GameBoard() {
             onClick={() => placeSelectedPlate(slot.id)}
             aria-label={label}
           >
-            {slot.plate !== null ? <Plate plate={slot.plate} /> : <span className="board-slot__empty" aria-hidden="true">+</span>}
+            {slot.plate !== null
+              ? <Plate plate={slot.plate} rotationDegrees={view.plateRotations.get(slot.id) ?? 0} />
+              : <span className="board-slot__empty" aria-hidden="true">+</span>}
           </button>
         );
       })}
@@ -53,7 +57,7 @@ export function GameBoard() {
         {view.flights.map(({ event, from, to }, index) => (
           <svg
             className="slice-flight"
-            key={`${presentation?.id ?? 0}-${view.stepIndex}-${index}`}
+            key={`${presentation?.id ?? 0}-${presentation?.phase ?? "idle"}-${view.stepIndex}-${index}`}
             viewBox="0 0 100 100"
             style={{
               "--from-x": `${from.x}%`,

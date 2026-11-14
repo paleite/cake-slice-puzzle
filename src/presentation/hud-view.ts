@@ -44,16 +44,22 @@ export function describeEvents(events: readonly GameEvent[]): string {
     : formatSliceCount(lastEvent.sliceCount);
 }
 
+function describePresentation(presentation: Presentation, lastEvents: readonly GameEvent[]): string {
+  if (presentation.phase === "rotate") return "Aligning slices…";
+  if (presentation.phase === "settle") return describeEvents(lastEvents);
+  const step = getPresentationStep(presentation);
+  return step === undefined ? describeEvents(lastEvents) : describeResolveStep(step);
+}
+
 export function buildHudView(
   state: Pick<GameState, "score" | "cakesCleared" | "status">,
   presentation: Presentation | null,
   lastEvents: readonly GameEvent[],
 ): HudView {
-  const step = presentation === null ? undefined : getPresentationStep(presentation);
   return {
     score: presentation === null ? state.score : getPresentationScore(presentation),
     cakesCleared: presentation === null ? state.cakesCleared : getPresentationCakesCleared(presentation),
-    message: step === undefined ? describeEvents(lastEvents) : describeResolveStep(step),
+    message: presentation === null ? describeEvents(lastEvents) : describePresentation(presentation, lastEvents),
     phase: getGamePhase(state.status, presentation),
   };
 }

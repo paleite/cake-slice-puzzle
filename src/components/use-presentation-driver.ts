@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { getStepDurationMs } from "../presentation/timing";
+import { getBeatDurationMs } from "../presentation/timing";
 import { useGameStore } from "../store/game-store";
 
 /**
@@ -12,7 +12,7 @@ export function usePresentationDriver(): void {
 
   useEffect(() => {
     if (presentation === null) return;
-    const duration = getStepDurationMs(presentation.steps[presentation.index]);
+    const duration = getBeatDurationMs(presentation);
     const timer = window.setTimeout(finishPresentationStep, Math.max(1, duration));
     return () => window.clearTimeout(timer);
   }, [presentation, finishPresentationStep]);

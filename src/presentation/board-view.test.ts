@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createEmptySlots } from "../game/geometry";
 import type { CakeTypeId, ClearEvent, GameState, Plate, ResolveStep, SlotId, TransferEvent } from "../game/types";
 import { buildBoardView, getSlotCenter } from "./board-view";
-import type { Presentation } from "./model";
+import type { Presentation, PresentationPhase } from "./model";
 
 function plate(id: string, types: CakeTypeId[]): Plate {
   return { id, slices: types.map((cakeTypeId) => ({ cakeTypeId })) };
@@ -28,7 +28,7 @@ const transfer: TransferEvent = {
 };
 const clear: ClearEvent = { type: "clear", slotId: "b1", cakeTypeId: "strawberry", score: 100 };
 
-function presentation(index: number): Presentation {
+function presentation(index: number, phase: PresentationPhase = "rotate"): Presentation {
   const start = state({
     b1: plate("five", Array<CakeTypeId>(5).fill("strawberry")),
     b2: plate("one", ["strawberry"]),
@@ -39,7 +39,7 @@ function presentation(index: number): Presentation {
     { state: afterTransfer, events: [transfer] },
     { state: afterClear, events: [clear] },
   ];
-  return { id: 7, placedSlotId: "b2", startState: start, steps, index };
+  return { id: 7, placedSlotId: "b2", startState: start, steps, index, phase };
 }
 
 describe("board view", () => {
@@ -51,12 +51,26 @@ describe("board view", () => {
     expect(view.flights).toEqual([]);
     expect(view.clearingSlotIds.size).toBe(0);
     expect(view.placedSlotId).toBeNull();
+    expect(view.plateRotations.size).toBe(0);
+  });
+
+  it("keeps the source slices in place while both plates rotate toward each other", () => {
+    const view = buildBoardView({ slots: [] }, presentation(0, "rotate"));
+
+    expect(view.isAnimating).toBe(true);
+    expect(view.placedSlotId).toBe("b2");
+    expect(view.slots.find((slot) => slot.id === "b2")?.plate?.slices).toHaveLength(1);
+    expect(view.slots.find((slot) => slot.id === "b1")?.plate?.slices).toHaveLength(5);
+    expect(view.flights).toEqual([]);
+    expect(view.clearingSlotIds.size).toBe(0);
+    expect(view.arrivedSlotIds.size).toBe(0);
+    expect(view.plateRotations.get("b2")).toBe(-120);
+    expect(view.plateRotations.get("b1")).toBe(120);
   });
 
   it("empties transfer sources and positions the flight while the target still waits", () => {
-    const view = buildBoardView({ slots: [] }, presentation(0));
+    const view = buildBoardView({ slots: [] }, presentation(0, "resolve"));
 
-    expect(view.isAnimating).toBe(true);
     expect(view.placedSlotId).toBe("b2");
     expect(view.slots.find((slot) => slot.id === "b2")?.plate).toBeNull();
     expect(view.slots.find((slot) => slot.id === "b1")?.plate?.slices).toHaveLength(5);
@@ -67,16 +81,28 @@ describe("board view", () => {
     }]);
     expect(view.clearingSlotIds.size).toBe(0);
     expect(view.arrivedSlotIds.size).toBe(0);
+    expect(view.plateRotations.get("b2")).toBe(-120);
   });
 
   it("marks the previous transfer target as arrived and the clearing slot during a clear step", () => {
-    const view = buildBoardView({ slots: [] }, presentation(1));
+    const view = buildBoardView({ slots: [] }, presentation(1, "resolve"));
 
     expect(view.placedSlotId).toBeNull();
     expect(view.slots.find((slot) => slot.id === "b1")?.plate?.slices).toHaveLength(6);
     expect(view.clearingSlotIds.has("b1")).toBe(true);
     expect(view.arrivedSlotIds.has("b1")).toBe(true);
     expect(view.flights).toEqual([]);
+  });
+
+  it("settles plates back to their base rotation after the final step", () => {
+    const view = buildBoardView({ slots: [] }, presentation(2, "settle"));
+
+    expect(view.isAnimating).toBe(true);
+    expect(view.placedSlotId).toBeNull();
+    expect(view.slots.every((slot) => slot.plate === null)).toBe(true);
+    expect(view.plateRotations.size).toBe(0);
+    expect(view.flights).toEqual([]);
+    expect(view.clearingSlotIds.size).toBe(0);
   });
 
   it("maps grid slots to percentage centers", () => {
