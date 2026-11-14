@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createEmptySlots } from "./geometry";
 import { resolveBoard } from "./resolver";
+import { findMergeCandidate } from "./transfers";
 import type { CakeTypeId, GameState, Plate, SlotId } from "./types";
 
 function plate(id: string, cakeTypeIds: CakeTypeId[]): Plate {
@@ -52,6 +53,39 @@ describe("resolveBoard matching propagation", () => {
     }
     expect(result.state.cakesCleared).toBe(expectedCakeClears);
     expect(result.state.status).toBe("playing");
+  });
+
+  it("resolves the same cake type again when a clear unlocks another merge", () => {
+    const result = resolveBoard(state({
+      a1: plate("five", ["strawberry", "strawberry", "strawberry", "strawberry", "strawberry"]),
+      a2: plate("feeder", ["strawberry"]),
+      b1: plate("origin", ["strawberry", "lemon"]),
+      b2: plate("tail", ["strawberry"]),
+    }), "b1");
+
+    expect(result.events.map((event) => event.type === "transfer"
+      ? `${event.sourceSlotId}>${event.targetSlotId}x${event.sliceCount}`
+      : `clear:${event.slotId}`)).toEqual(["a2>a1x1", "clear:a1", "b2>b1x1"]);
+    expect(cakeTypesAt(result.state, "b1")).toEqual(["strawberry", "lemon", "strawberry"]);
+    expect(cakeTypesAt(result.state, "b2")).toEqual([]);
+    expect(findMergeCandidate(result.state, "b1", new Set())).toBeNull();
+  });
+
+  it("groups resolution events into ordered animation steps", () => {
+    const result = resolveBoard(state({
+      a1: plate("five", ["strawberry", "strawberry", "strawberry", "strawberry", "strawberry"]),
+      a2: plate("feeder", ["strawberry"]),
+      b1: plate("origin", ["strawberry", "lemon"]),
+      b2: plate("tail", ["strawberry"]),
+    }), "b1");
+
+    expect(result.steps.map((step) => step.events.map((event) => event.type))).toEqual([
+      ["transfer"],
+      ["clear"],
+      ["transfer"],
+    ]);
+    expect(result.steps.flatMap((step) => step.events)).toEqual(result.events);
+    expect(result.steps.at(-1)?.state.slots).toEqual(result.state.slots);
   });
 
   it("keeps every branch in the frozen component even when the origin becomes empty", () => {

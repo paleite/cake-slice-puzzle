@@ -1,14 +1,14 @@
 import { createEmptySlots } from "./geometry";
 import { generateTray } from "./generator";
 import { resolveBoard } from "./resolver";
-import type { GameState, Plate, SlotId } from "./types";
+import type { GameEvent, GameState, Plate, ResolveStep, SlotId } from "./types";
 
 export function createNewGame(seed = Date.now() >>> 0): GameState {
   const opening = generateTray(seed, 0);
   const generated = generateTray(opening.seed, 0);
   const openingSlotIds = ["b1", "b2", "c1"] as const;
   return {
-    slots: createEmptySlots().map((slot, index) => {
+    slots: createEmptySlots().map((slot) => {
       const openingIndex = openingSlotIds.indexOf(slot.id as typeof openingSlotIds[number]);
       return openingIndex === -1 ? slot : { ...slot, plate: opening.tray[openingIndex] };
     }),
@@ -21,11 +21,20 @@ export function createNewGame(seed = Date.now() >>> 0): GameState {
   };
 }
 
-export function placePlate(state: GameState, plateId: string, targetSlotId: SlotId): { state: GameState; events: ReturnType<typeof resolveBoard>["events"] } {
-  if (state.status !== "playing") return { state, events: [] };
+export type PlacementResult = {
+  state: GameState;
+  events: GameEvent[];
+  steps: ResolveStep[];
+  startState: GameState;
+};
+
+export function placePlate(state: GameState, plateId: string, targetSlotId: SlotId): PlacementResult {
+  if (state.status !== "playing") return { state, events: [], steps: [], startState: state };
   const plate = state.tray.find((candidate) => candidate.id === plateId);
   const targetSlot = state.slots.find((slot) => slot.id === targetSlotId);
-  if (plate === undefined || targetSlot === undefined || targetSlot.plate !== null) return { state, events: [] };
+  if (plate === undefined || targetSlot === undefined || targetSlot.plate !== null) {
+    return { state, events: [], steps: [], startState: state };
+  }
 
   const placedState: GameState = {
     ...state,
@@ -45,7 +54,7 @@ export function placePlate(state: GameState, plateId: string, targetSlotId: Slot
   const boardIsFull = nextState.slots.every((slot) => slot.plate !== null);
   if (boardIsFull) nextState = { ...nextState, status: "game-over" };
 
-  return { state: nextState, events: resolved.events };
+  return { state: nextState, events: resolved.events, steps: resolved.steps, startState: placedState };
 }
 
 export function copyPlate(plate: Plate): Plate {

@@ -54,7 +54,13 @@ export type ClearEvent = {
 
 export type GameEvent = TransferEvent | ClearEvent;
 
+export type ResolveStep = {
+  state: GameState;
+  events: GameEvent[];
+};
+
 export type ResolveResult = {
   state: GameState;
   events: GameEvent[];
+  steps: ResolveStep[];
 };

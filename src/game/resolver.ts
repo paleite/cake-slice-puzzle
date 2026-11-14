@@ -6,6 +6,11 @@ import type { CakeTypeId, ClearEvent, GameState, ResolveResult, SlotId } from ".
 export function resolveBoard(initialState: GameState, resolutionOriginSlotId: SlotId): ResolveResult {
   let state: GameState = { ...initialState, status: "resolving" };
   const events: ResolveResult["events"] = [];
+  const steps: ResolveResult["steps"] = [];
+  // Each cake type consolidates at most once between clears. Re-merging the same type
+  // without a clear can move slices back and forth between two plates (a full source and
+  // a smaller target) forever. A clear frees capacity and can unlock further merges, so it
+  // re-arms every type; clears are monotonic, which bounds the whole resolution.
   const resolvedCakeTypeIds = new Set<CakeTypeId>();
 
   for (let operationIndex = 0; operationIndex < GAME_CONFIG.maximumResolutionOperations; operationIndex += 1) {
@@ -23,6 +28,8 @@ export function resolveBoard(initialState: GameState, resolutionOriginSlotId: Sl
         cakesCleared: state.cakesCleared + 1,
       };
       events.push(event);
+      steps.push({ state, events: [event] });
+      resolvedCakeTypeIds.clear();
       continue;
     }
 
@@ -30,11 +37,12 @@ export function resolveBoard(initialState: GameState, resolutionOriginSlotId: Sl
     if (mergeCandidate !== null) {
       state = applyMergeCandidate(state, mergeCandidate);
       events.push(...mergeCandidate.transfers);
+      steps.push({ state, events: mergeCandidate.transfers });
       resolvedCakeTypeIds.add(mergeCandidate.cakeTypeId);
       continue;
     }
 
-    return { state: { ...state, status: "playing" }, events };
+    return { state: { ...state, status: "playing" }, events, steps };
   }
 
   throw new Error(`Resolution exceeded ${GAME_CONFIG.maximumResolutionOperations} operations.`);

@@ -2,8 +2,10 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+const base = "/cake-slice-puzzle/";
+
 export default defineConfig({
-  base: "/cake-slice-puzzle/",
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -17,10 +19,10 @@ export default defineConfig({
         background_color: "#fff6e9",
         display: "standalone",
         orientation: "portrait",
-        start_url: "/cake-slice-puzzle/",
+        start_url: base,
         icons: [
           {
-            src: "/icon.svg",
+            src: `${base}icon.svg`,
             sizes: "any",
             type: "image/svg+xml",
             purpose: "any maskable"
@@ -28,7 +30,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        navigateFallback: "/index.html"
+        navigateFallback: `${base}index.html`
       }
     })
   ]

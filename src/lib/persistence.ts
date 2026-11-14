@@ -1,19 +1,23 @@
 import { z } from "zod";
-import { CAKE_TYPES, type GameState } from "../game/types";
+import { GAME_CONFIG } from "../game/config";
+import { SLOT_LAYOUT } from "../game/geometry";
+import { CAKE_TYPES, type GameState, type SlotId } from "../game/types";
 
 const STORAGE_KEY = "cake-slice-puzzle:v1";
 
+const SLOT_IDS = SLOT_LAYOUT.map((slot) => slot.id) as [SlotId, ...SlotId[]];
+
 const sliceSchema = z.object({ cakeTypeId: z.enum(CAKE_TYPES) });
-const plateSchema = z.object({ id: z.string(), slices: z.array(sliceSchema).max(6) });
+const plateSchema = z.object({ id: z.string(), slices: z.array(sliceSchema).max(GAME_CONFIG.plateCapacity) });
 const slotSchema = z.object({
-  id: z.enum(["a0", "a1", "a2", "b0", "b1", "b2", "b3", "c0", "c1", "c2", "c3", "d0", "d1", "d2"]),
+  id: z.enum(SLOT_IDS),
   row: z.number().int(),
   column: z.number().int(),
   plate: plateSchema.nullable(),
 });
 const gameStateSchema = z.object({
-  slots: z.array(slotSchema).length(14),
-  tray: z.array(plateSchema).max(3),
+  slots: z.array(slotSchema).length(SLOT_LAYOUT.length),
+  tray: z.array(plateSchema).max(GAME_CONFIG.traySize),
   score: z.number().int().nonnegative(),
   cakesCleared: z.number().int().nonnegative(),
   status: z.enum(["playing", "resolving", "game-over"]),
@@ -34,5 +38,9 @@ export function loadGame(): GameState | null {
 }
 
 export function saveGame(state: GameState): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Storage can be unavailable (private mode) or full; the game keeps running without persistence.
+  }
 }

@@ -5,24 +5,29 @@ export function Tray() {
   const tray = useGameStore((state) => state.tray);
   const selectedPlateId = useGameStore((state) => state.selectedPlateId);
   const selectPlate = useGameStore((state) => state.selectPlate);
+  const presentation = useGameStore((state) => state.presentation);
+  const displayedTray = presentation === null ? tray : presentation.startState.tray;
 
   return (
     <section className="tray" aria-label="Next plates">
       <div className="tray__label">Next plates</div>
       <div className="tray__plates">
-        {tray.map((plate) => (
+        {displayedTray.map((plate) => (
           <button
             type="button"
             key={plate.id}
             className={`tray-plate${selectedPlateId === plate.id ? " tray-plate--selected" : ""}`}
             onClick={() => selectPlate(plate.id)}
             aria-pressed={selectedPlateId === plate.id}
+            aria-label={`Select plate with ${plate.slices.length} slices`}
           >
             <Plate plate={plate} compact />
           </button>
         ))}
       </div>
-      <p className="tray__hint">Select a plate, then tap an empty slot.</p>
+      <p className="tray__hint">
+        {presentation === null ? "Select a plate, then tap an empty slot." : "Merging…"}
+      </p>
     </section>
   );
 }

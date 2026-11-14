@@ -1,7 +1,22 @@
 import { useState } from "react";
+import {
+  getPresentationCakesCleared,
+  getPresentationScore,
+} from "../game/presentation";
+import type { ResolveStep } from "../game/types";
 import { useGameStore } from "../store/game-store";
 import { GameBoard } from "./GameBoard";
 import { Tray } from "./Tray";
+
+function describeStep(step: ResolveStep): string {
+  const clear = step.events.find((event) => event.type === "clear");
+  if (clear !== undefined) return `Cake cleared +${clear.score}`;
+  const sliceCount = step.events.reduce(
+    (total, event) => total + (event.type === "transfer" ? event.sliceCount : 0),
+    0,
+  );
+  return `${sliceCount} slice${sliceCount === 1 ? "" : "s"} merged`;
+}
 
 export function GameScreen() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -9,21 +24,29 @@ export function GameScreen() {
   const cakesCleared = useGameStore((state) => state.cakesCleared);
   const status = useGameStore((state) => state.status);
   const recentEvents = useGameStore((state) => state.recentEvents);
+  const presentation = useGameStore((state) => state.presentation);
   const restart = useGameStore((state) => state.restart);
 
+  const currentStep = presentation === null ? undefined : presentation.steps[presentation.index];
+  const displayedScore = presentation === null ? score : getPresentationScore(presentation);
+  const displayedCakesCleared = presentation === null ? cakesCleared : getPresentationCakesCleared(presentation);
+
   const lastEvent = recentEvents.at(-1);
-  const eventText = lastEvent?.type === "clear"
+  const lastEventText = lastEvent?.type === "clear"
     ? `Cake cleared +${lastEvent.score}`
     : lastEvent?.type === "transfer"
       ? `${lastEvent.sliceCount} slice${lastEvent.sliceCount === 1 ? "" : "s"} merged`
       : "Build complete cakes of six matching slices.";
+  const eventText = currentStep === undefined ? lastEventText : describeStep(currentStep);
 
   return (
     <main className="game-shell">
       <header className="hud">
         <div>
           <span className="hud__eyebrow">Score</span>
-          <strong>{score.toLocaleString()}</strong>
+          <strong className="hud__value" key={`score-${displayedScore}`}>
+            {displayedScore.toLocaleString()}
+          </strong>
         </div>
         <button
           type="button"
@@ -36,7 +59,7 @@ export function GameScreen() {
         </button>
         <div className="hud__right">
           <span className="hud__eyebrow">Cleared</span>
-          <strong>{cakesCleared}</strong>
+          <strong className="hud__value">{displayedCakesCleared}</strong>
         </div>
       </header>
 
@@ -62,7 +85,7 @@ export function GameScreen() {
         </div>
       )}
 
-      {status === "game-over" && (
+      {status === "game-over" && presentation === null && (
         <div className="game-over" role="dialog" aria-modal="true" aria-label="Game over">
           <div className="game-over__card">
             <span className="hud__eyebrow">Game over</span>
