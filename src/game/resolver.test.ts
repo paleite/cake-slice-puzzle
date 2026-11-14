@@ -11,7 +11,7 @@ function plate(id: string, cakeTypeIds: CakeTypeId[]): Plate {
 function state(plates: Partial<Record<SlotId, Plate>>): GameState {
   return {
     slots: createEmptySlots().map((slot) => ({ ...slot, plate: plates[slot.id] ?? null })),
-    tray: [], score: 0, cakesCleared: 0, status: "playing", randomSeed: 1, focusedSlotId: null,
+    tray: [], score: 0, cakesCleared: 0, status: "playing", randomSeed: 1,
   };
 }
 

@@ -16,6 +16,13 @@ pnpm build
 pnpm preview
 ```
 
+## Layers
+
+- `src/game/` — pure domain: board state, generator, resolver, completion, transfers. No React, no DOM, no timing.
+- `src/presentation/` — pure presentation model: phase, step timing, frame projection, board/HUD/tray view builders, palette. No React.
+- `src/store/` — wiring: owns domain state plus the ephemeral presentation queue; persists domain state only.
+- `src/components/` — rendering: one driver advances presentation steps; components map view builders to markup.
+
 ## Current v1 resolver rule
 
 Matching slices consolidate across connected orthogonal plate components reached from the newly placed plate.

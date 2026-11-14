@@ -104,21 +104,15 @@ button:focus-visible {
   aspect-ratio: 1;
   overflow: visible;
   transform: translate(-50%, -50%);
-  animation: slice-flight var(--flight-ms, 560ms) cubic-bezier(.45, .05, .55, .95) both;
+  animation: slice-flight var(--flight-ms) cubic-bezier(.45, .05, .55, .95) both;
   will-change: transform, opacity;
 }
 .slice-flight__wedge {
   stroke: #fff8ee;
   stroke-width: 1.6;
   transform-origin: 50px 50px;
-  animation: slice-flight-spin var(--flight-ms, 560ms) ease-in-out both;
+  animation: slice-flight-spin var(--flight-ms) ease-in-out both;
 }
-.slice-flight__wedge--strawberry { fill: #ef6a72; }
-.slice-flight__wedge--lemon { fill: #f5c84c; }
-.slice-flight__wedge--mint { fill: #74c58a; }
-.slice-flight__wedge--blueberry { fill: #7788da; }
-.slice-flight__wedge--chocolate { fill: #9a6957; }
-.slice-flight__wedge--orange { fill: #f29b52; }
 
 .board-slot {
   position: relative;
@@ -153,7 +147,7 @@ button:focus-visible {
 .board-slot--clearing::before { opacity: 0; }
 .board-slot--placed .plate { animation: plate-drop 340ms cubic-bezier(.2, .9, .3, 1.2) both; }
 .board-slot--arrived .plate { animation: plate-receive 300ms cubic-bezier(.2, .8, .2, 1) both; }
-.board-slot--clearing .plate { animation: plate-clear var(--clear-ms, 680ms) cubic-bezier(.4, 0, .6, 1) both; }
+.board-slot--clearing .plate { animation: plate-clear var(--clear-ms) cubic-bezier(.4, 0, .6, 1) both; }
 
 .plate { width: 92%; aspect-ratio: 1; filter: drop-shadow(0 4px 5px rgb(63 39 25 / 16%)); }
 .plate svg { display: block; width: 100%; height: 100%; overflow: visible; }

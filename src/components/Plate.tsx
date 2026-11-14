@@ -1,13 +1,5 @@
-import type { CakeTypeId, Plate as PlateType } from "../game/types";
-
-const cakeColors: Record<CakeTypeId, string> = {
-  strawberry: "#ef6a72",
-  lemon: "#f5c84c",
-  mint: "#74c58a",
-  blueberry: "#7788da",
-  chocolate: "#9a6957",
-  orange: "#f29b52",
-};
+import type { Plate as PlateType } from "../game/types";
+import { CAKE_COLORS } from "../presentation/palette";
 
 function polarPoint(angleDegrees: number, radius: number) {
   const angle = (angleDegrees - 90) * (Math.PI / 180);
@@ -33,7 +25,7 @@ export function Plate({ plate, compact = false }: { plate: PlateType; compact?: 
             <path
               key={`${slice.cakeTypeId}-${index}`}
               d={wedgePath(startAngle, startAngle + 60)}
-              fill={cakeColors[slice.cakeTypeId]}
+              fill={CAKE_COLORS[slice.cakeTypeId]}
               className="plate__slice"
             />
           );

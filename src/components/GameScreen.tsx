@@ -1,51 +1,29 @@
 import { useState } from "react";
-import {
-  getPresentationCakesCleared,
-  getPresentationScore,
-} from "../game/presentation";
-import type { ResolveStep } from "../game/types";
+import { buildHudView } from "../presentation/hud-view";
 import { useGameStore } from "../store/game-store";
 import { GameBoard } from "./GameBoard";
 import { Tray } from "./Tray";
-
-function describeStep(step: ResolveStep): string {
-  const clear = step.events.find((event) => event.type === "clear");
-  if (clear !== undefined) return `Cake cleared +${clear.score}`;
-  const sliceCount = step.events.reduce(
-    (total, event) => total + (event.type === "transfer" ? event.sliceCount : 0),
-    0,
-  );
-  return `${sliceCount} slice${sliceCount === 1 ? "" : "s"} merged`;
-}
+import { usePresentationDriver } from "./use-presentation-driver";
 
 export function GameScreen() {
+  usePresentationDriver();
   const [menuOpen, setMenuOpen] = useState(false);
-  const score = useGameStore((state) => state.score);
-  const cakesCleared = useGameStore((state) => state.cakesCleared);
-  const status = useGameStore((state) => state.status);
-  const recentEvents = useGameStore((state) => state.recentEvents);
+  const score = useGameStore((state) => state.game.score);
+  const cakesCleared = useGameStore((state) => state.game.cakesCleared);
+  const status = useGameStore((state) => state.game.status);
+  const lastEvents = useGameStore((state) => state.lastEvents);
   const presentation = useGameStore((state) => state.presentation);
   const restart = useGameStore((state) => state.restart);
 
-  const currentStep = presentation === null ? undefined : presentation.steps[presentation.index];
-  const displayedScore = presentation === null ? score : getPresentationScore(presentation);
-  const displayedCakesCleared = presentation === null ? cakesCleared : getPresentationCakesCleared(presentation);
-
-  const lastEvent = recentEvents.at(-1);
-  const lastEventText = lastEvent?.type === "clear"
-    ? `Cake cleared +${lastEvent.score}`
-    : lastEvent?.type === "transfer"
-      ? `${lastEvent.sliceCount} slice${lastEvent.sliceCount === 1 ? "" : "s"} merged`
-      : "Build complete cakes of six matching slices.";
-  const eventText = currentStep === undefined ? lastEventText : describeStep(currentStep);
+  const hud = buildHudView({ score, cakesCleared, status }, presentation, lastEvents);
 
   return (
     <main className="game-shell">
       <header className="hud">
         <div>
           <span className="hud__eyebrow">Score</span>
-          <strong className="hud__value" key={`score-${displayedScore}`}>
-            {displayedScore.toLocaleString()}
+          <strong className="hud__value" key={`score-${hud.score}`}>
+            {hud.score.toLocaleString()}
           </strong>
         </div>
         <button
@@ -59,11 +37,11 @@ export function GameScreen() {
         </button>
         <div className="hud__right">
           <span className="hud__eyebrow">Cleared</span>
-          <strong className="hud__value">{displayedCakesCleared}</strong>
+          <strong className="hud__value">{hud.cakesCleared}</strong>
         </div>
       </header>
 
-      <div className="event-banner" aria-live="polite">{eventText}</div>
+      <div className="event-banner" aria-live="polite">{hud.message}</div>
       <GameBoard />
       <Tray />
 
@@ -85,7 +63,7 @@ export function GameScreen() {
         </div>
       )}
 
-      {status === "game-over" && presentation === null && (
+      {hud.phase === "complete" && (
         <div className="game-over" role="dialog" aria-modal="true" aria-label="Game over">
           <div className="game-over__card">
             <span className="hud__eyebrow">Game over</span>

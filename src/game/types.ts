@@ -34,7 +34,6 @@ export type GameState = {
   cakesCleared: number;
   status: GameStatus;
   randomSeed: number;
-  focusedSlotId: SlotId | null;
 };
 
 export type TransferEvent = {

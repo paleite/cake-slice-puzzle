@@ -1,68 +1,73 @@
 import { create } from "zustand";
 import { createNewGame, placePlate } from "../game/game";
-import { prefersReducedMotion, type Presentation } from "../game/presentation";
 import type { GameEvent, GameState, SlotId } from "../game/types";
+import { prefersReducedMotion } from "../presentation/motion";
+import {
+  createPresentation,
+  finishPresentationStep as advanceStep,
+  type Presentation,
+} from "../presentation/model";
 import { loadGame, saveGame } from "../lib/persistence";
 
-type GameStore = GameState & {
+type GameStore = {
+  game: GameState;
   selectedPlateId: string | null;
-  recentEvents: GameEvent[];
-  eventBatchId: number;
+  lastEvents: GameEvent[];
   presentation: Presentation | null;
+  nextPresentationId: number;
   selectPlate: (plateId: string) => void;
   placeSelectedPlate: (slotId: SlotId) => void;
-  advancePresentation: () => void;
+  finishPresentationStep: () => void;
   restart: () => void;
 };
 
-const initialState = loadGame() ?? createNewGame();
+const initialGame = loadGame() ?? createNewGame(Date.now() >>> 0);
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  ...initialState,
-  selectedPlateId: initialState.tray[0]?.id ?? null,
-  recentEvents: [],
-  eventBatchId: 0,
+  game: initialGame,
+  selectedPlateId: initialGame.tray[0]?.id ?? null,
+  lastEvents: [],
   presentation: null,
+  nextPresentationId: 1,
 
   selectPlate: (plateId) => set({ selectedPlateId: plateId }),
 
   placeSelectedPlate: (slotId) => {
-    const currentState = get();
-    if (currentState.presentation !== null || currentState.selectedPlateId === null) return;
+    const currentStore = get();
+    if (currentStore.presentation !== null || currentStore.selectedPlateId === null) return;
 
-    const result = placePlate(currentState, currentState.selectedPlateId, slotId);
-    if (result.state === currentState) return;
+    const result = placePlate(currentStore.game, currentStore.selectedPlateId, slotId);
+    if (result.state === currentStore.game) return;
 
-    const presentation: Presentation | null = result.steps.length > 0 && !prefersReducedMotion()
-      ? { startState: result.startState, steps: result.steps, index: 0 }
+    const presentation = result.steps.length > 0 && !prefersReducedMotion()
+      ? createPresentation(currentStore.nextPresentationId, slotId, result.startState, result.steps)
       : null;
 
     saveGame(result.state);
     set({
-      ...result.state,
+      game: result.state,
       selectedPlateId: result.state.tray[0]?.id ?? null,
-      recentEvents: result.events,
-      eventBatchId: currentState.eventBatchId + 1,
+      lastEvents: result.events,
       presentation,
+      nextPresentationId: presentation === null
+        ? currentStore.nextPresentationId
+        : currentStore.nextPresentationId + 1,
     });
   },
 
-  advancePresentation: () => set((state) => {
-    if (state.presentation === null) return {};
-    const nextIndex = state.presentation.index + 1;
-    if (nextIndex >= state.presentation.steps.length) return { presentation: null };
-    return { presentation: { ...state.presentation, index: nextIndex } };
-  }),
+  finishPresentationStep: () => set((state) => ({
+    presentation: state.presentation === null ? null : advanceStep(state.presentation),
+  })),
 
   restart: () => {
-    const nextState = createNewGame();
-    saveGame(nextState);
+    const game = createNewGame(Date.now() >>> 0);
+    saveGame(game);
     set({
-      ...nextState,
-      selectedPlateId: nextState.tray[0]?.id ?? null,
-      recentEvents: [],
-      eventBatchId: 0,
+      game,
+      selectedPlateId: game.tray[0]?.id ?? null,
+      lastEvents: [],
       presentation: null,
+      nextPresentationId: 1,
     });
   },
 }));

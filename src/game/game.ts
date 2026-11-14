@@ -1,9 +1,9 @@
 import { createEmptySlots } from "./geometry";
 import { generateTray } from "./generator";
 import { resolveBoard } from "./resolver";
-import type { GameEvent, GameState, Plate, ResolveStep, SlotId } from "./types";
+import type { GameEvent, GameState, ResolveStep, SlotId } from "./types";
 
-export function createNewGame(seed = Date.now() >>> 0): GameState {
+export function createNewGame(seed: number): GameState {
   const opening = generateTray(seed, 0);
   const generated = generateTray(opening.seed, 0);
   const openingSlotIds = ["b1", "b2", "c1"] as const;
@@ -17,7 +17,6 @@ export function createNewGame(seed = Date.now() >>> 0): GameState {
     cakesCleared: 0,
     status: "playing",
     randomSeed: generated.seed,
-    focusedSlotId: null,
   };
 }
 
@@ -40,7 +39,6 @@ export function placePlate(state: GameState, plateId: string, targetSlotId: Slot
     ...state,
     slots: state.slots.map((slot) => slot.id === targetSlotId ? { ...slot, plate } : slot),
     tray: state.tray.filter((candidate) => candidate.id !== plateId),
-    focusedSlotId: targetSlotId,
   };
 
   const resolved = resolveBoard(placedState, targetSlotId);
@@ -55,8 +53,4 @@ export function placePlate(state: GameState, plateId: string, targetSlotId: Slot
   if (boardIsFull) nextState = { ...nextState, status: "game-over" };
 
   return { state: nextState, events: resolved.events, steps: resolved.steps, startState: placedState };
-}
-
-export function copyPlate(plate: Plate): Plate {
-  return { ...plate, slices: plate.slices.map((slice) => ({ ...slice })) };
 }

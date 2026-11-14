@@ -1,18 +1,19 @@
+import { buildTrayView } from "../presentation/hud-view";
 import { useGameStore } from "../store/game-store";
 import { Plate } from "./Plate";
 
 export function Tray() {
-  const tray = useGameStore((state) => state.tray);
+  const tray = useGameStore((state) => state.game.tray);
   const selectedPlateId = useGameStore((state) => state.selectedPlateId);
   const selectPlate = useGameStore((state) => state.selectPlate);
   const presentation = useGameStore((state) => state.presentation);
-  const displayedTray = presentation === null ? tray : presentation.startState.tray;
+  const view = buildTrayView({ tray }, presentation);
 
   return (
     <section className="tray" aria-label="Next plates">
       <div className="tray__label">Next plates</div>
       <div className="tray__plates">
-        {displayedTray.map((plate) => (
+        {view.plates.map((plate) => (
           <button
             type="button"
             key={plate.id}
@@ -26,7 +27,7 @@ export function Tray() {
         ))}
       </div>
       <p className="tray__hint">
-        {presentation === null ? "Select a plate, then tap an empty slot." : "Merging…"}
+        {view.isResolving ? "Merging…" : "Select a plate, then tap an empty slot."}
       </p>
     </section>
   );

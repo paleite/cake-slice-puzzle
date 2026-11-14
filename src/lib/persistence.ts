@@ -22,7 +22,6 @@ const gameStateSchema = z.object({
   cakesCleared: z.number().int().nonnegative(),
   status: z.enum(["playing", "resolving", "game-over"]),
   randomSeed: z.number().int().nonnegative(),
-  focusedSlotId: slotSchema.shape.id.nullable(),
 });
 
 export function loadGame(): GameState | null {
