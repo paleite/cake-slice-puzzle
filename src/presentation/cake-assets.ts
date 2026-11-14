@@ -24,3 +24,9 @@ export const SLICE_IMAGE_SIZE = 54;
 export const SLICE_TIP_RATIO_Y = 0.95;
 export const SLICE_IMAGE_X = PLATE_CENTER.x - SLICE_IMAGE_SIZE / 2;
 export const SLICE_IMAGE_Y = PLATE_CENTER.y - SLICE_TIP_RATIO_Y * SLICE_IMAGE_SIZE;
+
+/** Aligns the flat cake top with the isometric plate's ellipse. */
+export const CAKE_CENTER_Y = 50.5;
+export const CAKE_Y_SCALE = 0.62;
+export const CAKE_PERSPECTIVE_TRANSFORM =
+  `translate(${PLATE_CENTER.x} ${CAKE_CENTER_Y}) scale(1 ${CAKE_Y_SCALE}) translate(${-PLATE_CENTER.x} ${-PLATE_CENTER.y})`;

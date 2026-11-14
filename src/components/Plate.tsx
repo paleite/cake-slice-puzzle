@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Plate as PlateType } from "../game/types";
 import {
+  CAKE_PERSPECTIVE_TRANSFORM,
   CAKE_PLATE_ASSET,
   CAKE_SLICE_ASSETS,
   PLATE_CENTER,
@@ -41,28 +42,30 @@ export function Plate({
           height="100"
           className="plate__art"
         />
-        <g
-          className="plate__slices"
-          style={{ transform: `rotate(${displayRotation}deg)` }}
-        >
-          {slices.map((slice, index) => {
-            if (hiddenSliceIndexes?.has(index)) return null;
-            return (
-              <g
-                key={`${slice.cakeTypeId}-${index}`}
-                transform={`rotate(${index * 60} ${PLATE_CENTER.x} ${PLATE_CENTER.y})`}
-              >
-                <image
-                  href={CAKE_SLICE_ASSETS[slice.cakeTypeId]}
-                  x={SLICE_IMAGE_X}
-                  y={SLICE_IMAGE_Y}
-                  width={SLICE_IMAGE_SIZE}
-                  height={SLICE_IMAGE_SIZE}
-                  className="plate__slice"
-                />
-              </g>
-            );
-          })}
+        <g transform={CAKE_PERSPECTIVE_TRANSFORM}>
+          <g
+            className="plate__slices"
+            style={{ transform: `rotate(${displayRotation}deg)` }}
+          >
+            {slices.map((slice, index) => {
+              if (hiddenSliceIndexes?.has(index)) return null;
+              return (
+                <g
+                  key={`${slice.cakeTypeId}-${index}`}
+                  transform={`rotate(${index * 60} ${PLATE_CENTER.x} ${PLATE_CENTER.y})`}
+                >
+                  <image
+                    href={CAKE_SLICE_ASSETS[slice.cakeTypeId]}
+                    x={SLICE_IMAGE_X}
+                    y={SLICE_IMAGE_Y}
+                    width={SLICE_IMAGE_SIZE}
+                    height={SLICE_IMAGE_SIZE}
+                    className="plate__slice"
+                  />
+                </g>
+              );
+            })}
+          </g>
         </g>
       </svg>
     </div>

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import {
+  CAKE_PERSPECTIVE_TRANSFORM,
   CAKE_PLATE_ASSET,
   CAKE_SLICE_ASSETS,
   PLATE_CENTER,
@@ -91,14 +92,16 @@ export function GameBoard() {
               "--spin-to": `${spinTo}deg`,
             } as CSSProperties}
           >
-            <g className="slice-flight__spin">
-              <image
-                href={CAKE_SLICE_ASSETS[event.cakeTypeId]}
-                x={SLICE_IMAGE_X}
-                y={SLICE_IMAGE_Y}
-                width={SLICE_IMAGE_SIZE}
-                height={SLICE_IMAGE_SIZE}
-              />
+            <g transform={CAKE_PERSPECTIVE_TRANSFORM}>
+              <g className="slice-flight__spin">
+                <image
+                  href={CAKE_SLICE_ASSETS[event.cakeTypeId]}
+                  x={SLICE_IMAGE_X}
+                  y={SLICE_IMAGE_Y}
+                  width={SLICE_IMAGE_SIZE}
+                  height={SLICE_IMAGE_SIZE}
+                />
+              </g>
             </g>
           </svg>
         ))}

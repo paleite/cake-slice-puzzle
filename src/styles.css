@@ -250,7 +250,7 @@ button:focus-visible {
 .plate svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .plate__slices {
   transform-box: view-box;
-  transform-origin: 50% 50%;
+  transform-origin: 50px 56px;
   transition: transform var(--rotate-ms, 150ms) cubic-bezier(.2, .9, .25, 1.12);
 }
 .plate--compact { width: 100%; }
