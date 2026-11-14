@@ -1,0 +1,14 @@
+Source page: https://www.onlinegameworlds.com/games/cake-slice-match
+Source video: reference/cake-slice-match-trailer.webm
+
+Segment map
+0.000-4.000s  In-game board gameplay: slice placement, tray selection, and merge behavior.
+              Included.
+4.000-7.500s  "NEW CAKE UNLOCKED" reward interstitial. Excluded.
+7.500-10.000s Mystery-box/reward card screens. Excluded.
+
+Extraction
+- Frames: 12 fps, 48 frames, timestamps 0.000-3.917s.
+- Crop: 254x454 at x=194; removes black side bars and the GameMonetize watermark.
+- Naming: frame-0001.webp = 0.000s; frame-0048.webp = 3.917s.
+- Contact sheets: gameplay-contact-0.0-2.0s.webp, gameplay-contact-2.0-4.0s.webp.
